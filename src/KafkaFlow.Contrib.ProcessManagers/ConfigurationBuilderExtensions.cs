@@ -1,4 +1,5 @@
 using KafkaFlow.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KafkaFlow.ProcessManagers;
 
@@ -17,8 +18,16 @@ public static class ConfigurationBuilderExtensions
             builder.Add(
                 resolver => new ProcessManagerMiddleware(
                     resolver,
-                    resolver.Resolve<IProcessStateRepository>(),
+                    resolver.Resolve<IProcessStateStore>(),
                     configuration),
                 MiddlewareLifetime.Scoped);
     }
+
+    public static IServiceCollection AddProcessManagerStateStore(
+        this IServiceCollection services,
+        Func<IServiceProvider, IProcessStateStore> factory) => services.AddSingleton(factory);
+
+    public static IServiceCollection AddProcessManagerStateStore(
+        this IServiceCollection services,
+        IProcessStateStore store) => services.AddSingleton(store);
 }

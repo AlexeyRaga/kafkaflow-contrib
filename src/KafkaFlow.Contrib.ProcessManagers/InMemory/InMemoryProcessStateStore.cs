@@ -2,7 +2,7 @@
 
 namespace KafkaFlow.ProcessManagers.InMemory;
 
-public sealed class InMemoryProcessStateRepository : IProcessStateRepository
+public sealed class InMemoryProcessStateStore : IProcessStateStore
 {
     public readonly ConcurrentDictionary<(Type, Guid), MarkedState> Store = new();
 

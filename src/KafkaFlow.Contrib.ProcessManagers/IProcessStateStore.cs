@@ -11,7 +11,7 @@ public sealed class OptimisticConcurrencyException : Exception
     }
 }
 
-public interface IProcessStateRepository
+public interface IProcessStateStore
 {
     ValueTask Persist(Type processType, Guid processId, MarkedState state);
     ValueTask<MarkedState> Load(Type processType, Guid processId);

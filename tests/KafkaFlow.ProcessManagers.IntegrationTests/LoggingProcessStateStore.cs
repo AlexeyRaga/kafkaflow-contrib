@@ -2,13 +2,13 @@ using KafkaFlow.ProcessManagers.InMemory;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests;
 
-public sealed class LoggingProcessStateStore : IProcessStateRepository
+public sealed class LoggingProcessStateStore : IProcessStateStore
 {
     public enum ActionType
     {
         Persisted, Deleted
     }
-    private readonly InMemoryProcessStateRepository _innerStore = new();
+    private readonly InMemoryProcessStateStore _innerStore = new();
     private readonly List<(ActionType, Type, Guid, MarkedState?)> _log = new();
 
     public IReadOnlyList<(ActionType, Type, Guid, MarkedState?)> Changes => _log.AsReadOnly();

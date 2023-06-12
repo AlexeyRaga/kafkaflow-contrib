@@ -35,7 +35,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\KafkaFlow.ProcessManagers\KafkaFlow.ProcessManagers.csproj" />
+      <ProjectReference Include="..\..\src\KafkaFlow.Contrib.ProcessManagers\KafkaFlow.Contrib.ProcessManagers.csproj" />
     </ItemGroup>
 
 </Project>

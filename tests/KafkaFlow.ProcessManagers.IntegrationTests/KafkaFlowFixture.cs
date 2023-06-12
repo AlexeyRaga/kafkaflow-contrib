@@ -28,7 +28,7 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
 
         services
             .AddLogging(log => log.AddConsole().AddDebug())
-            .AddProcessManagerState(ProcessStateStore)
+            .AddProcessManagerStateStore(ProcessStateStore)
             .AddInMemoryOutboxBackend()
             .AddKafka(kafka =>
                 kafka

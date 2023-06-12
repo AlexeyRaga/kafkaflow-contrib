@@ -6,16 +6,16 @@ namespace KafkaFlow.ProcessManagers;
 internal sealed class ProcessManagerMiddleware : IMessageMiddleware
 {
     private readonly IDependencyResolver _dependencyResolver;
-    private readonly IProcessStateRepository _stateRepository;
+    private readonly IProcessStateStore _stateStore;
     private readonly ProcessManagerConfiguration _configuration;
 
     public ProcessManagerMiddleware(
         IDependencyResolver dependencyResolver,
-        IProcessStateRepository stateRepository,
+        IProcessStateStore stateStore,
         ProcessManagerConfiguration configuration)
     {
         _dependencyResolver = dependencyResolver ?? throw new ArgumentNullException(nameof(dependencyResolver));
-        _stateRepository = stateRepository ?? throw new ArgumentNullException(nameof(stateRepository));
+        _stateStore = stateStore ?? throw new ArgumentNullException(nameof(stateStore));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
@@ -49,16 +49,16 @@ internal sealed class ProcessManagerMiddleware : IMessageMiddleware
 
         var transactionScope = StartTransactionScopeFor(TransactionMode.ForEachHandler);
         var processId = executor.GetProcessId(handler, context.Message.Value);
-        var state = await _stateRepository.Load(stateType, processId).ConfigureAwait(false);
+        var state = await _stateStore.Load(stateType, processId).ConfigureAwait(false);
 
         var newState = await executor.Execute(handler, state.State, context, context.Message.Value);
         if (newState == null)
         {
-            await _stateRepository.Delete(stateType, processId);
+            await _stateStore.Delete(stateType, processId);
         }
         else
         {
-            await _stateRepository.Persist(stateType, processId, state with { State = newState });
+            await _stateStore.Persist(stateType, processId, state with { State = newState });
         }
 
         transactionScope?.Complete();
