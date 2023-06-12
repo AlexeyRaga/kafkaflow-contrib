@@ -51,20 +51,16 @@ internal sealed class ProcessManagerMiddleware : IMessageMiddleware
         var processId = executor.GetProcessId(handler, context.Message.Value);
         var state = await _stateRepository.Load(stateType, processId).ConfigureAwait(false);
 
-        var (result, newState) = await executor.Execute(handler, state.State, context, context.Message.Value);
-
-        switch (result)
+        var newState = await executor.Execute(handler, state.State, context, context.Message.Value);
+        if (newState == null)
         {
-            case ProcessResult.StateNoChange: break;
-            case ProcessResult.StateUpdated:
-                await _stateRepository.Persist(stateType, processId, state with { State = newState });
-                break;
-            case ProcessResult.ProcessCompleted:
-                await _stateRepository.Delete(stateType, processId);
-                break;
-            default:
-                throw new InvalidEnumArgumentException(nameof(result), (int)result, typeof(ProcessResult));
+            await _stateRepository.Delete(stateType, processId);
         }
+        else
+        {
+            await _stateRepository.Persist(stateType, processId, state with { State = newState });
+        }
+
         transactionScope?.Complete();
     }
 }

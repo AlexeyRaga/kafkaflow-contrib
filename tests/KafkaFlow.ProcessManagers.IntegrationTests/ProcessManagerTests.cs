@@ -17,17 +17,18 @@ public sealed class ProcessManagerTests : IAssemblyFixture<KafkaFlowFixture>
         var message = new UserRegistered(Guid.NewGuid(), "test@test.com");
         await _fixture.Producer.ProduceAsync(message.UserId.ToString(), message);
 
-        await Task.Delay(TimeSpan.FromSeconds(10));
-
-        _fixture.ProcessStateStore.Current.Should().BeEmpty();
-        _fixture.ProcessStateStore
-            .Changes
-            .Select(x => x.Item1)
-            .Should().BeEquivalentTo(new[]
-            {
-                LoggingProcessStateStore.ActionType.Persisted,
-                LoggingProcessStateStore.ActionType.Persisted,
-                LoggingProcessStateStore.ActionType.Deleted,
-            }, x => x.WithStrictOrdering());
+        TestUtils.RetryFor(TimeSpan.FromSeconds(30), TimeSpan.FromMicroseconds(100), () =>
+        {
+            _fixture.ProcessStateStore.Current.Should().BeEmpty();
+            _fixture.ProcessStateStore
+                .Changes
+                .Select(x => x.Item1)
+                .Should().BeEquivalentTo(new[]
+                {
+                    LoggingProcessStateStore.ActionType.Persisted,
+                    LoggingProcessStateStore.ActionType.Persisted,
+                    LoggingProcessStateStore.ActionType.Deleted,
+                }, x => x.WithStrictOrdering());
+        });
     }
 }

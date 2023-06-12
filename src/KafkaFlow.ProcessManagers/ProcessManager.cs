@@ -12,29 +12,25 @@ public abstract class ProcessManager<TState> : IProcessManager where TState : cl
         State = state;
     }
 
-    protected ProcessResult UpdateState(TState state)
+    protected void UpdateState(TState state)
     {
         State = state;
-        return ProcessResult.StateUpdated;
     }
 
-    protected ProcessResult FinishProcess()
+    protected void FinishProcess()
     {
         State = null;
-        return ProcessResult.ProcessCompleted;
     }
 
-    protected ProcessResult NoStateChange() => ProcessResult.StateNoChange;
-
-    protected async Task<ProcessResult> WithRequiredStateAsync(Func<TState, Task<ProcessResult>> handler)
+    protected async Task WithRequiredStateAsync(Func<TState, Task> handler)
     {
-        if (!IsStateSet) return NoStateChange();
-        return await handler(State!);
+        if (!IsStateSet) return;
+        await handler(State!);
     }
 
-    protected ProcessResult WithRequiredState(Func<TState, ProcessResult> handler)
+    protected void WithRequiredState(Action<TState> handler)
     {
-        if (!IsStateSet) return NoStateChange();
-        return handler(State!);
+        if (!IsStateSet) return;
+        handler(State!);
     }
 }

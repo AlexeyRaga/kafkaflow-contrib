@@ -45,29 +45,29 @@ public class TestProcessManager : ProcessManager<TestState>,
     public Guid GetProcessId(UserAccessGranted message) => message.UserId;
     public Guid GetProcessId(UserApproved message) => message.UserId;
 
-    public async Task<ProcessResult> Handle(IMessageContext context, UserRegistered message)
+    public async Task Handle(IMessageContext context, UserRegistered message)
     {
         _logger.LogInformation("Received message: {Message}", message);
         await _producer.ProduceAsync(message.UserId.ToString(), new UserApproved(message.UserId));
         await _producer.ProduceAsync(message.UserId.ToString(), new UserAccessGranted(message.UserId));
 
         var newState = new TestState(DateTimeOffset.UtcNow, ImmutableList.Create("UserRegistered"));
-        return UpdateState(newState);
+        UpdateState(newState);
     }
 
-    public async Task<ProcessResult> Handle(IMessageContext context, UserApproved message)
+    public async Task Handle(IMessageContext context, UserApproved message)
     {
         _logger.LogInformation("Received message: {Message}", message);
-        return WithRequiredState(state =>
+        WithRequiredState(state =>
         {
             var newState = state with { Log = state.Log.Add("UserApproved") };
-            return UpdateState(newState);
+            UpdateState(newState);
         });
     }
 
-    public async Task<ProcessResult> Handle(IMessageContext context, UserAccessGranted message)
+    public async Task Handle(IMessageContext context, UserAccessGranted message)
     {
         _logger.LogInformation("Received message: {Message}", message);
-        return FinishProcess();
+        FinishProcess();
     }
 }
