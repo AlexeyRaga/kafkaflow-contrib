@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v23.1.9
+    hostname: kafka
+    environment:
+      REDPANDA_DEVELOPER_MODE: true
+    command:
+      - redpanda start
+      - --smp 1
+      - --overprovisioned
+      - --kafka-addr PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://kafka:29092,OUTSIDE://localhost:9092
+      - --unsafe-bypass-fsync
+      - --check=false
+      - --set group_max_session_timeout_ms=3000
+      - --set kafka_group_recovery_timeout_ms=3000
+    ports:
+      - 8081:8081
+      - 8082:8082
+      - 9092:9092
+      - 9644:9644
+      - 29092:29092
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:9644/v1/status/ready" ]
+      interval: 1s
+      timeout: 1s
+      retries: 60
+
+  kowl:
+    image: vectorized/console:v2.2.3
+    restart: always
+    deploy:
+      replicas: 1
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redpanda
+    environment:
+      - KAFKA_BROKERS=kafka:29092
+      - KAFKA_SCHEMAREGISTRY_ENABLED=TRUE
+      - KAFKA_SCHEMAREGISTRY_URLS=http://kafka:8081
+
+  db:
+    image: public.ecr.aws/docker/library/postgres:14.7-alpine
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
