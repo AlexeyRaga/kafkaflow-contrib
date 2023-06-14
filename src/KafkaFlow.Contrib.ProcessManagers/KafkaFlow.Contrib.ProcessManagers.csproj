@@ -10,10 +10,7 @@
     <ItemGroup>
       <PackageReference Include="KafkaFlow.Abstractions" Version="2.2.16" />
       <PackageReference Include="KafkaFlow.TypedHandler" Version="2.2.16" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\KafkaFlow.Contrib.Outbox\KafkaFlow.Contrib.Outbox.csproj" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
     </ItemGroup>
 
 </Project>
