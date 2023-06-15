@@ -47,7 +47,7 @@ public class PostgresOutboxBackend : IOutboxBackend
 DELETE FROM outbox.outbox
 WHERE
     sequence_id = ANY(ARRAY(
-        SELECT schedule_id FROM outbox.outbox
+        SELECT sequence_id FROM outbox.outbox
         ORDER BY sequence_id
         LIMIT @batch_size
         FOR UPDATE

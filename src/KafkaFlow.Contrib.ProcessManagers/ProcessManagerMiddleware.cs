@@ -47,7 +47,7 @@ internal sealed class ProcessManagerMiddleware : IMessageMiddleware
 
         var executor = HandlerExecutor.GetExecutor(stateType, messageType);
 
-        var transactionScope = StartTransactionScopeFor(TransactionMode.ForEachHandler);
+        using var transactionScope = StartTransactionScopeFor(TransactionMode.ForEachHandler);
         var processId = executor.GetProcessId(handler, context.Message.Value);
         var state = await _stateStore.Load(stateType, processId).ConfigureAwait(false);
 

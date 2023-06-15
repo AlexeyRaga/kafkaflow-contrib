@@ -13,7 +13,7 @@ public sealed class ProcessManagerConfigurationBuilder
 
     private Func<TransactionScope> _beginTransaction =
         () => new TransactionScope(
-            scopeOption: TransactionScopeOption.Required,
+            scopeOption: TransactionScopeOption.RequiresNew,
             transactionOptions: new TransactionOptions
                 { IsolationLevel = IsolationLevel.ReadCommitted, Timeout = TimeSpan.FromSeconds(30) },
             asyncFlowOption: TransactionScopeAsyncFlowOption.Enabled);

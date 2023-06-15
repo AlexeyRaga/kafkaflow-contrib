@@ -7,6 +7,7 @@ using KafkaFlow.Serializer;
 using KafkaFlow.TypedHandler;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests;
@@ -17,6 +18,7 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
     public string TopicName { get; }
     public readonly ServiceProvider ServiceProvider;
     private readonly IKafkaBus _kafkaBus;
+    private readonly CancellationTokenSource _fixtureCancellation;
 
     public LoggingProcessStateStore ProcessStateStore { get; }
 
@@ -24,6 +26,7 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
 
     public KafkaFlowFixture()
     {
+        _fixtureCancellation = new CancellationTokenSource();
         TopicName = $"messages-{FixtureId}";
 
         var services = new ServiceCollection();
@@ -38,7 +41,6 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
             .AddSingleton<IConfiguration>(config.Build())
             .AddLogging(log => log.AddConsole().AddDebug())
             .AddProcessManagerStateStore(ProcessStateStore)
-            //.AddInMemoryOutboxBackend()
             .AddPostgresOutboxBackend()
             .AddKafka(kafka =>
                 kafka
@@ -47,6 +49,7 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
                         cluster
                             .WithBrokers(new[] { "localhost:9092 " })
                             .CreateTopicIfNotExists(TopicName, 3, 1)
+                            .AddOutboxDispatcher()
                             .AddProducer<KafkaFlowFixture>(producer =>
                                 producer
                                     .WithOutbox()
@@ -54,11 +57,7 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
                                     .AddMiddlewares(m => m.AddSerializer<JsonCoreSerializer>()))
                             .AddProducer<ITestMessageProducer>(producer =>
                                 producer
-                                    .WithCustomFactory((x, r) =>
-                                    {
-                                        var b = r.Resolve<IOutboxBackend>();
-                                        return x;
-                                    })
+                                    .WithOutbox()
                                     .DefaultTopic(TopicName)
                                     .AddMiddlewares(m => m.AddSerializer<JsonCoreSerializer>())
                                 )
@@ -81,8 +80,15 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
 
         Producer = ServiceProvider.GetRequiredService<IMessageProducer<KafkaFlowFixture>>();
 
+        var svc = ServiceProvider.GetServices<IHostedService>();
+
+        foreach (var service in svc)
+        {
+            service.StartAsync(_fixtureCancellation.Token);
+        }
+
         _kafkaBus = ServiceProvider.CreateKafkaBus();
-        _kafkaBus.StartAsync();
+        _kafkaBus.StartAsync(_fixtureCancellation.Token);
     }
 
     public void Dispose()
@@ -99,6 +105,8 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
     {
         _disposedAsync = true;
 
+        _fixtureCancellation.Cancel();
+        _fixtureCancellation.Dispose();
         await _kafkaBus.StopAsync();
 
         foreach (var cons in ServiceProvider.GetRequiredService<IConsumerAccessor>().All)

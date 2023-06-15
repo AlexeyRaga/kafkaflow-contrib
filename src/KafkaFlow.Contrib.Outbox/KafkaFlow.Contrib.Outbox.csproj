@@ -10,6 +10,7 @@
     <ItemGroup>
       <PackageReference Include="KafkaFlow.Abstractions" Version="2.2.16" />
       <PackageReference Include="KafkaFlow.Microsoft.DependencyInjection" Version="2.2.16" />
+      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
     </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@ using Confluent.Kafka;
 
 namespace KafkaFlow.Outbox;
 
-public sealed class OutboxProducerDecorator : IProducer<byte[], byte[]>
+internal sealed class OutboxProducerDecorator : IProducer<byte[], byte[]>
 {
     private readonly IProducer<byte[], byte[]> _inner;
     private readonly IOutboxBackend _outbox;
