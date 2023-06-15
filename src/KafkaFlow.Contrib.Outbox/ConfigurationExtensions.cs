@@ -18,5 +18,5 @@ public static class ConfigurationExtensions
     public static IProducerConfigurationBuilder WithOutbox(
         this IProducerConfigurationBuilder builder,
         IOutboxBackend outbox) =>
-        builder.WithCustomFactory((producer, resolver) => new OutboxProducerDecorator(producer, outbox));
+        builder.WithCustomFactory((producer, _) => new OutboxProducerDecorator(producer, outbox));
 }

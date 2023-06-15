@@ -35,8 +35,16 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\src\KafkaFlow.Contrib.Outbox.Postgres\KafkaFlow.Contrib.Outbox.Postgres.csproj" />
       <ProjectReference Include="..\..\src\KafkaFlow.Contrib.Outbox\KafkaFlow.Contrib.Outbox.csproj" />
       <ProjectReference Include="..\..\src\KafkaFlow.Contrib.ProcessManagers\KafkaFlow.Contrib.ProcessManagers.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="appsettings.json" />
+      <Content Include="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
     </ItemGroup>
 
 </Project>

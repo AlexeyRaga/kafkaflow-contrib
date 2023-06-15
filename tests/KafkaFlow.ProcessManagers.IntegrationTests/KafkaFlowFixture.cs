@@ -1,8 +1,11 @@
 using KafkaFlow.Consumers;
+using KafkaFlow.Outbox;
 using KafkaFlow.Outbox.InMemory;
+using KafkaFlow.Outbox.Postgres;
 using KafkaFlow.ProcessManagers.InMemory;
 using KafkaFlow.Serializer;
 using KafkaFlow.TypedHandler;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -26,10 +29,17 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
         var services = new ServiceCollection();
         ProcessStateStore = new LoggingProcessStateStore();
 
+        var config = new ConfigurationManager()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false)
+            .AddEnvironmentVariables();
+
         services
+            .AddSingleton<IConfiguration>(config.Build())
             .AddLogging(log => log.AddConsole().AddDebug())
             .AddProcessManagerStateStore(ProcessStateStore)
-            .AddInMemoryOutboxBackend()
+            //.AddInMemoryOutboxBackend()
+            .AddPostgresOutboxBackend()
             .AddKafka(kafka =>
                 kafka
                     .UseMicrosoftLog()
@@ -39,13 +49,19 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
                             .CreateTopicIfNotExists(TopicName, 3, 1)
                             .AddProducer<KafkaFlowFixture>(producer =>
                                 producer
+                                    .WithOutbox()
                                     .DefaultTopic(TopicName)
                                     .AddMiddlewares(m => m.AddSerializer<JsonCoreSerializer>()))
                             .AddProducer<ITestMessageProducer>(producer =>
                                 producer
+                                    .WithCustomFactory((x, r) =>
+                                    {
+                                        var b = r.Resolve<IOutboxBackend>();
+                                        return x;
+                                    })
                                     .DefaultTopic(TopicName)
-                                    // .WithOutbox()
-                                    .AddMiddlewares(m => m.AddSerializer<JsonCoreSerializer>()))
+                                    .AddMiddlewares(m => m.AddSerializer<JsonCoreSerializer>())
+                                )
                             .AddConsumer(consumer =>
                                 consumer
                                     .Topic(TopicName)
