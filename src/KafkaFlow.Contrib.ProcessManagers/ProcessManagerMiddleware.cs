@@ -26,7 +26,7 @@ internal sealed class ProcessManagerMiddleware : IMessageMiddleware
             var handlers = _configuration.TypeMapping.GetHandlersTypes(context.Message.Value.GetType());
             if (handlers.Any())
             {
-                var allHandlersScope = StartTransactionScopeFor(TransactionMode.ForAllHandlers);
+                using var allHandlersScope = StartTransactionScopeFor(TransactionMode.ForAllHandlers);
                 await Task.WhenAll(handlers.Select(t => RunHandler(t, context))).ConfigureAwait(false);
                 allHandlersScope?.Complete();
             }
@@ -54,7 +54,7 @@ internal sealed class ProcessManagerMiddleware : IMessageMiddleware
         var newState = await executor.Execute(handler, state.State, context, context.Message.Value);
         if (newState == null)
         {
-            await _stateStore.Delete(stateType, processId);
+            await _stateStore.Delete(stateType, processId, state.Version);
         }
         else
         {

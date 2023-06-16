@@ -1,26 +1,86 @@
-﻿using KafkaFlow.ProcessManagers;
+﻿using System.Text.Json;
+using Dapper;
+using KafkaFlow.ProcessManagers;
+using Microsoft.Extensions.Options;
+using Npgsql;
 
 namespace KafkaFlow.Contrib.ProcessManagers.Postgres;
 
 public sealed class PostgresProcessManagersStore : IProcessStateStore
 {
-    public PostgresProcessManagersStore()
-    {
+    private readonly PostgresProcessManagersConfig _options;
+    private readonly NpgsqlDataSource _connectionPool;
 
+    public PostgresProcessManagersStore(IOptions<PostgresProcessManagersConfig> options)
+    {
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        _connectionPool = new NpgsqlDataSourceBuilder(options.Value.ConnectionString).Build();
     }
 
-    public ValueTask Persist(Type processType, Guid processId, MarkedState state)
+    public async ValueTask Persist(Type processType, Guid processId, VersionedState state)
     {
-        throw new NotImplementedException();
+        var sql = @"
+INSERT INTO process_managers.processes(process_type, process_id, process_state)
+VALUES (@process_type, @process_id, @process_state)
+ON CONFLICT (process_type, process_id) DO
+UPDATE
+SET
+    process_state       = EXCLUDED.process_state,
+    date_updated_utc   = (now() AT TIME ZONE 'utc')
+WHERE xmin = @version
+";
+        await using var conn = _connectionPool.CreateConnection();
+        var result = await conn.ExecuteAsync(sql, new
+        {
+            process_type = processType.FullName,
+            process_id = processId,
+            process_state = JsonSerializer.Serialize(state.State),
+            version = state.Version
+        });
+
+        if (result == 0)
+            throw new OptimisticConcurrencyException(processType, processId,
+                $"Concurrency error when persisting state {processType.FullName}");
     }
 
-    public ValueTask<MarkedState> Load(Type processType, Guid processId)
+    public async ValueTask<VersionedState> Load(Type processType, Guid processId)
     {
-        throw new NotImplementedException();
+        var sql = @"
+SELECT process_state, xmin as version
+FROM process_managers.processes
+WHERE process_type = @process_type AND process_id = @process_id";
+
+        await using var conn = _connectionPool.CreateConnection();
+        var result = await conn.ExecuteScalarAsync<ProcessStateRow?>(sql, new
+        {
+            process_type = processType.FullName,
+            process_id = processId
+        });
+
+        if (result == null) return VersionedState.Zero;
+
+        var decoded = JsonSerializer.Deserialize(result.process_state, processType);
+        return new VersionedState(result.version, decoded);
     }
 
-    public ValueTask Delete(Type processType, Guid processId)
+    public async ValueTask Delete(Type processType, Guid processId, ulong version)
     {
-        throw new NotImplementedException();
+        var sql = @"
+DELETE FROM process_managers.processes
+WHERE process_type = @process_type AND process_id = @process_id and xmin = @version";
+
+        await using var conn = _connectionPool.CreateConnection();
+        var result = await conn.ExecuteAsync(sql, new
+        {
+            process_type = processType.FullName,
+            process_id = processId,
+            version = version
+        });
+
+        if (result == 0)
+            throw new OptimisticConcurrencyException(processType, processId,
+                $"Concurrency error when persisting state {processType.FullName}");
     }
+
+    private sealed record ProcessStateRow(ulong version, string process_state);
 }

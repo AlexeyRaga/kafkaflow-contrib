@@ -58,4 +58,6 @@ services:
       retries: 5
     restart: unless-stopped
     volumes:
-      - "./src/KafkaFlow.Contrib.Outbox.Postgres/schema:/docker-entrypoint-initdb.d"
+      - "./local-env/postgres:/docker-entrypoint-initdb.d"
+      - "./src/KafkaFlow.Contrib.Outbox.Postgres/schema:/docker-entrypoint-initdb.d/0001.outbox"
+      - "./src/KafkaFlow.Contrib.ProcessManagers.Postgres/schema:/docker-entrypoint-initdb.d/0002.processes"

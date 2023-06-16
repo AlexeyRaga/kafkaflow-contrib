@@ -2,12 +2,19 @@ namespace KafkaFlow.ProcessManagers;
 
 public sealed class OptimisticConcurrencyException : Exception
 {
-    public OptimisticConcurrencyException(string? message) : base(message)
+    public Type ProcessType { get; init; }
+    public Guid ProcessId { get; init; }
+
+    public OptimisticConcurrencyException(Type processType, Guid processId, string? message) : base(message)
     {
+        ProcessType = processType;
+        ProcessId = processId;
     }
 
-    public OptimisticConcurrencyException(string? message, Exception? innerException) : base(message, innerException)
+    public OptimisticConcurrencyException(Type processType, Guid processId, string? message, Exception? innerException) : base(message, innerException)
     {
+        ProcessType = processType;
+        ProcessId = processId;
     }
 }
 
@@ -20,9 +27,9 @@ public interface IProcessStateStore
     /// may have updated the state.
     /// </summary>
     /// <exception cref="OptimisticConcurrencyException">When the state marker doesn't match the expected one while overwriting</exception>
-    ValueTask Persist(Type processType, Guid processId, MarkedState state);
+    ValueTask Persist(Type processType, Guid processId, VersionedState state);
 
-    ValueTask<MarkedState> Load(Type processType, Guid processId);
+    ValueTask<VersionedState> Load(Type processType, Guid processId);
 
-    ValueTask Delete(Type processType, Guid processId);
+    ValueTask Delete(Type processType, Guid processId, ulong version);
 }

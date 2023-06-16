@@ -1,4 +1,5 @@
 using KafkaFlow.Consumers;
+using KafkaFlow.Contrib.ProcessManagers.Postgres;
 using KafkaFlow.Outbox;
 using KafkaFlow.Outbox.InMemory;
 using KafkaFlow.Outbox.Postgres;
@@ -40,7 +41,8 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
         services
             .AddSingleton<IConfiguration>(config.Build())
             .AddLogging(log => log.AddConsole().AddDebug())
-            .AddProcessManagerStateStore(ProcessStateStore)
+            .AddPostgresProcessManagerState()
+            // .AddProcessManagerStateStore(ProcessStateStore)
             .AddPostgresOutboxBackend()
             .AddKafka(kafka =>
                 kafka

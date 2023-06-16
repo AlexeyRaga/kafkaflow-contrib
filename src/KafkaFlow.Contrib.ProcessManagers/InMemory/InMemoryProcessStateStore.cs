@@ -4,9 +4,9 @@ namespace KafkaFlow.ProcessManagers.InMemory;
 
 public sealed class InMemoryProcessStateStore : IProcessStateStore
 {
-    public readonly ConcurrentDictionary<(Type, Guid), MarkedState> Store = new();
+    public readonly ConcurrentDictionary<(Type, Guid), VersionedState> Store = new();
 
-    public ValueTask Persist(Type processType, Guid processId, MarkedState state)
+    public ValueTask Persist(Type processType, Guid processId, VersionedState state)
     {
         if (state.State == null)
         {
@@ -16,8 +16,8 @@ public sealed class InMemoryProcessStateStore : IProcessStateStore
         {
             Store.AddOrUpdate((processType, processId), state, (_, currentState) =>
             {
-                if (currentState.Marker != state.Marker)
-                    throw new OptimisticConcurrencyException(
+                if (currentState.Version != state.Version)
+                    throw new OptimisticConcurrencyException(processType, processId,
                         $"Concurrency error when persisting state {processType.FullName}");
 
                 return state;
@@ -27,14 +27,14 @@ public sealed class InMemoryProcessStateStore : IProcessStateStore
         return ValueTask.CompletedTask;
     }
 
-    public ValueTask<MarkedState> Load(Type processType, Guid processId)
+    public ValueTask<VersionedState> Load(Type processType, Guid processId)
     {
         return Store.TryGetValue((processType, processId), out var state)
             ? ValueTask.FromResult(state)
-            : ValueTask.FromResult(new MarkedState(Guid.NewGuid(), default));
+            : ValueTask.FromResult(new VersionedState(0, default));
     }
 
-    public ValueTask Delete(Type processType, Guid processId)
+    public ValueTask Delete(Type processType, Guid processId, long version)
     {
         Store.TryRemove((processType, processId), out _);
         return ValueTask.CompletedTask;
