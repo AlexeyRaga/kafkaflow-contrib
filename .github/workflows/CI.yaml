@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      CONFIGURATION: Release
       # Directories
       OUTPUT_DIR: output
       TEMP_DIR: temp
