@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      CONFIGURATION: Release
+
       # Directories
       OUTPUT_DIR: output
       TEMP_DIR: temp
@@ -41,15 +43,12 @@ jobs:
       with:
         useConfigFile: true
 
-    - name: Setup test dependencies
-      run: docker compose up -d
-
     - name: Restore dependencies
       run: dotnet restore
 
     - name: Build
       run: |
-        dotnet build --no-restore --configuration Release \
+        dotnet build --no-restore \
           /property:ContinuousIntegrationBuild=True \
           /property:DeterministicSourcePaths=True \
           /property:RepositoryUrl=https://github.com/${{ github.repository }} \
@@ -57,9 +56,12 @@ jobs:
           /property:FileVersion=${{ env.GitVersion_AssemblySemFileVer }} \
           /property:InformationalVersion=${{ env.GitVersion_InformationalVersion }}
 
+    - name: Setup test dependencies
+      run: docker compose up -d
+
     - name: Test
       run: |
-        dotnet test --no-restore --no-build  --configuration Release \
+        dotnet test --no-restore --no-build \
           --logger "trx;LogFileName=test-logs.trx" \
           --results-directory ${{ env.TEST_RESULTS_DIR }} \
           /property:CollectCoverage=True \
