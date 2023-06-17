@@ -1,6 +1,7 @@
 ## Process Managers for KafkaFlow
 
-The main purpose of a process manager is to encapsulate the process specific logic
+The main purpose of a [process manager](https://www.enterpriseintegrationpatterns.com/patterns/messaging/ProcessManager.html)
+is to encapsulate the process specific logic
 and maintain a central point of control. It’s initiated by a trigger message which
 could be an event coming out of a bounded context.
 
