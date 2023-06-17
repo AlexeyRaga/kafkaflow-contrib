@@ -1,6 +1,6 @@
 using Xunit.Sdk;
 
-namespace KafkaFlow.ProcessManagers.IntegrationTests;
+namespace KafkaFlow.ProcessManagers.IntegrationTests.Utils;
 
 public static class TestUtils
 {

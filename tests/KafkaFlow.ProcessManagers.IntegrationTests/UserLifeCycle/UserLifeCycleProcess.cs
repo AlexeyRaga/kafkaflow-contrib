@@ -1,33 +1,17 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
 
-namespace KafkaFlow.ProcessManagers.IntegrationTests;
+namespace KafkaFlow.ProcessManagers.IntegrationTests.UserLifeCycle;
 
 public sealed record TestState(DateTimeOffset StartedAt, ImmutableList<string> Log);
 
-public sealed class UserRegistered
-{
-    public UserRegistered(Guid UserId, string Email)
-    {
-        this.UserId = UserId;
-        this.Email = Email;
-    }
-
-    public Guid UserId { get; init; }
-    public string Email { get; init; }
-
-    public void Deconstruct(out Guid UserId, out string Email)
-    {
-        UserId = this.UserId;
-        Email = this.Email;
-    }
-}
+public sealed record UserRegistered(Guid UserId, string Email);
 
 public sealed record UserApproved(Guid UserId);
 
 public sealed record UserAccessGranted(Guid UserId);
 
-public class TestProcessManager : ProcessManager<TestState>,
+public class UserLifeCycleProcess : ProcessManager<TestState>,
     IProcessMessage<UserRegistered>,
     IProcessMessage<UserAccessGranted>,
     IProcessMessage<UserApproved>
@@ -35,7 +19,7 @@ public class TestProcessManager : ProcessManager<TestState>,
     private readonly ILogger _logger;
     private readonly IMessageProducer<ITestMessageProducer> _producer;
 
-    public TestProcessManager(ILogger<TestProcessManager> logger, IMessageProducer<ITestMessageProducer> producer)
+    public UserLifeCycleProcess(ILogger<UserLifeCycleProcess> logger, IMessageProducer<ITestMessageProducer> producer)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _producer = producer ?? throw new ArgumentNullException(nameof(producer));

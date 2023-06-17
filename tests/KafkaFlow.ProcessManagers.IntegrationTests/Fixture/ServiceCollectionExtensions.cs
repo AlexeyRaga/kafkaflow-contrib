@@ -1,6 +1,6 @@
-namespace KafkaFlow.ProcessManagers.IntegrationTests;
-
 using Microsoft.Extensions.DependencyInjection;
+
+namespace KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
 
 public static class ServiceCollectionExtensions
 {

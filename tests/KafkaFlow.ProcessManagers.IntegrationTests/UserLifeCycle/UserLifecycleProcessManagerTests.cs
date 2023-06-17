@@ -1,14 +1,16 @@
 using FluentAssertions;
+using KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
 
-namespace KafkaFlow.ProcessManagers.IntegrationTests;
+namespace KafkaFlow.ProcessManagers.IntegrationTests.UserLifeCycle;
 
-public sealed class ProcessManagerTests : IAssemblyFixture<KafkaFlowFixture>
+public sealed class UserLifecycleProcessManagerTests : IAssemblyFixture<KafkaFlowFixture>
 {
     private readonly KafkaFlowFixture _fixture;
 
-    public ProcessManagerTests(KafkaFlowFixture fixture)
+    public UserLifecycleProcessManagerTests(KafkaFlowFixture fixture)
     {
         _fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
+        _fixture.ProcessStateStore.ClearChanges();
     }
 
     [Fact]
@@ -26,7 +28,7 @@ public sealed class ProcessManagerTests : IAssemblyFixture<KafkaFlowFixture>
                 {
                     LoggingProcessStateStore.ActionType.Persisted,
                     LoggingProcessStateStore.ActionType.Persisted,
-                    LoggingProcessStateStore.ActionType.Deleted,
+                    LoggingProcessStateStore.ActionType.Deleted
                 }, x => x.WithStrictOrdering());
         });
     }

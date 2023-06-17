@@ -10,7 +10,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
-namespace KafkaFlow.ProcessManagers.IntegrationTests;
+namespace KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
 
 public class KafkaFlowFixture : IDisposable, IAsyncDisposable
 {

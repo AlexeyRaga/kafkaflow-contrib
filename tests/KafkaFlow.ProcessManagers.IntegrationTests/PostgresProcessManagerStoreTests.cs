@@ -1,7 +1,6 @@
 using FluentAssertions;
 using KafkaFlow.Contrib.ProcessManagers.Postgres;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests;

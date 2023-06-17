@@ -1,6 +1,4 @@
-using KafkaFlow.ProcessManagers.InMemory;
-
-namespace KafkaFlow.ProcessManagers.IntegrationTests;
+namespace KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
 
 public sealed class LoggingProcessStateStore : IProcessStateStore
 {
@@ -17,6 +15,8 @@ public sealed class LoggingProcessStateStore : IProcessStateStore
     }
 
     public IReadOnlyList<(ActionType, Type, Guid, VersionedState?)> Changes => _log.AsReadOnly();
+
+    public void ClearChanges() => _log.Clear();
 
     public ValueTask Persist(Type processType, Guid processId, VersionedState state)
     {
