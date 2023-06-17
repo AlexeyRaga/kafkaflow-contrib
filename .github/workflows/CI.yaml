@@ -41,6 +41,7 @@ jobs:
       with:
         useConfigFile: true
         updateAssemblyInfo: true
+        additionalArguments: '/ensureassemblyinfo'
 
     - name: Setup test dependencies
       run: docker compose up -d
