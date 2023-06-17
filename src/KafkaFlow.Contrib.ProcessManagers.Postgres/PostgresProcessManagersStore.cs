@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
 using Dapper;
 using KafkaFlow.ProcessManagers;
-using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace KafkaFlow.Contrib.ProcessManagers.Postgres;

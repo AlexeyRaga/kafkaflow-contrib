@@ -1,11 +1,9 @@
+using Confluent.Kafka;
 using KafkaFlow.Consumers;
 using KafkaFlow.Contrib.ProcessManagers.Postgres;
 using KafkaFlow.Outbox;
-using KafkaFlow.Outbox.InMemory;
 using KafkaFlow.Outbox.Postgres;
-using KafkaFlow.ProcessManagers.InMemory;
 using KafkaFlow.Serializer;
-using KafkaFlow.TypedHandler;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -24,7 +22,7 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
 
     public LoggingProcessStateStore ProcessStateStore { get; }
 
-    public IMessageProducer Producer { get; init; }
+    public IMessageProducer Producer { get; }
 
     public KafkaFlowFixture()
     {
@@ -50,7 +48,6 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
             .AddLogging(log => log.AddConsole().AddDebug())
             .AddPostgresProcessManagerState()
             .Decorate<IProcessStateStore, LoggingProcessStateStore>()
-            // .AddProcessManagerStateStore(ProcessStateStore)
             .AddPostgresOutboxBackend()
             .AddKafka(kafka =>
                 kafka
@@ -59,7 +56,7 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
                         cluster
                             .WithBrokers(new[] { "localhost:9092 " })
                             .CreateTopicIfNotExists(TopicName, 3, 1)
-                            .AddOutboxDispatcher()
+                            .AddOutboxDispatcher(x => x.WithPartitioner(Partitioner.Murmur2Random))
                             .AddProducer<KafkaFlowFixture>(producer =>
                                 producer
                                     .WithOutbox()

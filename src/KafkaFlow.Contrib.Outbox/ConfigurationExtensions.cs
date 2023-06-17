@@ -24,9 +24,16 @@ public static class ConfigurationExtensions
         IOutboxBackend outbox) =>
         builder.WithCustomFactory((producer, dec) => new OutboxProducerDecorator(producer, outbox));
 
-    public static IClusterConfigurationBuilder AddOutboxDispatcher(this IClusterConfigurationBuilder builder)
+    public static IClusterConfigurationBuilder AddOutboxDispatcher(
+        this IClusterConfigurationBuilder builder,
+        Action<IOutboxProducerConfigurationBuilder>? configure = null)
     {
-        builder.AddProducer<IOutboxDispatcher>(p => { });
+        builder.AddProducer<IOutboxDispatcher>(p =>
+        {
+            var producerBuilder = new OutboxProducerConfigurationBuilder(p);
+            configure?.Invoke(producerBuilder);
+            producerBuilder.Build();
+        });
         builder.DependencyConfigurator.AddSingleton<OutboxDispatcherService>();
         builder.OnStarted(r =>
         {
