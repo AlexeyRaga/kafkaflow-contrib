@@ -41,6 +41,7 @@ jobs:
       with:
         useConfigFile: true
         updateAssemblyInfo: true
+        updateAssemblyInfoFilename: AssemblyInfo.cs
         additionalArguments: '/ensureassemblyinfo'
 
     - name: Setup test dependencies
