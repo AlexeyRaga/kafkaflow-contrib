@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      # Directories
+      OUTPUT_DIR: output
+      TEMP_DIR: temp
+      TEST_RESULTS_DIR: ./output/test-results
+      REPORTS_DIR: ./output/reports
+      COVERAGE_REPORT_DIR: ./output/reports/coverage-report
+      COVERAGE_HISTORY_DIR: ./temp/coverage-history
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        global-json-file: global.json
+        
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0
+      with:
+        versionSpec: '5.x'
+
+    - name: Determine Version
+      id: gitversion
+      uses: gittools/actions/gitversion/execute@v0
+      with:
+        useConfigFile: true
+        
+    - name: Setup test dependencies
+      run: docker compose up -d
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: |
+        dotnet build --no-restore --configuration Release \
+          /property:ContinuousIntegrationBuild=True \
+          /property:DeterministicSourcePaths=True \
+          /property:RepositoryUrl=https://github.com/${{ github.repository }} \
+          /property:AssemblyVersion=${{ env.GitVersion_AssemblySemVer }} \
+          /property:FileVersion=${{ env.GitVersion_AssemblySemFileVer }} \
+          /property:InformationalVersion=${{ env.GitVersion_InformationalVersion }}
+      
+    - name: Test
+      run: |
+        dotnet test --no-restore --no-build  --configuration Release \
+          --logger "trx;LogFileName=test-logs.trx" \
+          --results-directory ${{ env.TEST_RESULTS_DIR }} \
+          /property:CollectCoverage=True \
+          /property:CoverletOutputFormat=opencover \
+          /property:CoverletOutput=${{ env.TEST_RESULTS_DIR }}/coverlet.xml 
+          
+    - name: Generate reports
+      run: |
+        if compgen -G "${{ env.TEST_RESULTS_DIR }}/*.xml" > /dev/null;
+        then
+          reportgenerator \
+            "-reports:${{ env.TEST_RESULTS_DIR }}/*.xml" \
+            "-targetdir:${{ env.COVERAGE_REPORT_DIR }} " \
+            "-reporttypes:XmlSummary;HtmlInline;Cobertura" \
+            "-historydir:${{ env.COVERAGE_HISTORY_DIR }}"
+
+        else
+          echo "::warning::No test results found"
+        fi
+      
+    - name: Teardown test dependencies
+      if: always()
+      run: |
+        docker compose down
+      
