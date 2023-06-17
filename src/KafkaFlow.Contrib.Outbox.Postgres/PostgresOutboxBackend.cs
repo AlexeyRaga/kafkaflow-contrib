@@ -8,13 +8,11 @@ namespace KafkaFlow.Outbox.Postgres;
 
 public class PostgresOutboxBackend : IOutboxBackend
 {
-    private readonly PostgresOutboxConfig _options;
     private readonly NpgsqlDataSource _connectionPool;
 
-    public PostgresOutboxBackend(IOptions<PostgresOutboxConfig> options)
+    public PostgresOutboxBackend(NpgsqlDataSource connectionPool)
     {
-        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-        _connectionPool = new NpgsqlDataSourceBuilder(options.Value.ConnectionString).Build();
+        _connectionPool = connectionPool;
     }
 
     public async ValueTask Store(TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)

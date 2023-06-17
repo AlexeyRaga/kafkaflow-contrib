@@ -35,7 +35,7 @@ internal sealed class OutboxDispatcherService : BackgroundService
 
     private static TransactionScope BeginTransaction =>
         new(
-            scopeOption: TransactionScopeOption.Required,
+            scopeOption: TransactionScopeOption.RequiresNew,
             transactionOptions: new TransactionOptions
                 { IsolationLevel = IsolationLevel.ReadCommitted, Timeout = TimeSpan.FromSeconds(30) },
             asyncFlowOption: TransactionScopeAsyncFlowOption.Enabled);

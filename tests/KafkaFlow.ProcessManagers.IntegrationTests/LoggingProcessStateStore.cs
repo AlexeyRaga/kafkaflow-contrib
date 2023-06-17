@@ -8,11 +8,15 @@ public sealed class LoggingProcessStateStore : IProcessStateStore
     {
         Persisted, Deleted
     }
-    private readonly InMemoryProcessStateStore _innerStore = new();
+    private readonly IProcessStateStore _innerStore;
     private readonly List<(ActionType, Type, Guid, VersionedState?)> _log = new();
 
+    public LoggingProcessStateStore(IProcessStateStore innerStore)
+    {
+        _innerStore = innerStore ?? throw new ArgumentNullException(nameof(innerStore));
+    }
+
     public IReadOnlyList<(ActionType, Type, Guid, VersionedState?)> Changes => _log.AsReadOnly();
-    public IReadOnlyDictionary<(Type, Guid), VersionedState> Current => _innerStore.Store.AsReadOnly();
 
     public ValueTask Persist(Type processType, Guid processId, VersionedState state)
     {

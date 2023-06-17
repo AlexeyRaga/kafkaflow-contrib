@@ -8,13 +8,11 @@ namespace KafkaFlow.Contrib.ProcessManagers.Postgres;
 
 public sealed class PostgresProcessManagersStore : IProcessStateStore
 {
-    private readonly PostgresProcessManagersConfig _options;
     private readonly NpgsqlDataSource _connectionPool;
 
-    public PostgresProcessManagersStore(IOptions<PostgresProcessManagersConfig> options)
+    public PostgresProcessManagersStore(NpgsqlDataSource connectionPool)
     {
-        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-        _connectionPool = new NpgsqlDataSourceBuilder(options.Value.ConnectionString).Build();
+        _connectionPool = connectionPool;
     }
 
     public async ValueTask Persist(Type processType, Guid processId, VersionedState state)

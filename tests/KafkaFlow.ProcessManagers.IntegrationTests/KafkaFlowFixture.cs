@@ -10,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests;
 
@@ -31,17 +32,24 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
         TopicName = $"messages-{FixtureId}";
 
         var services = new ServiceCollection();
-        ProcessStateStore = new LoggingProcessStateStore();
 
         var config = new ConfigurationManager()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile("appsettings.json", optional: false)
-            .AddEnvironmentVariables();
+            .AddEnvironmentVariables()
+            .Build();
+
+        var pgConfig = config.GetSection("ProcessManagers").Get<PostgresProcessManagersConfig>();
+
+        var pool = new NpgsqlDataSourceBuilder(pgConfig!.ConnectionString).Build();
+
 
         services
-            .AddSingleton<IConfiguration>(config.Build())
+            .AddSingleton<IConfiguration>(config)
+            .AddSingleton(pool)
             .AddLogging(log => log.AddConsole().AddDebug())
             .AddPostgresProcessManagerState()
+            .Decorate<IProcessStateStore, LoggingProcessStateStore>()
             // .AddProcessManagerStateStore(ProcessStateStore)
             .AddPostgresOutboxBackend()
             .AddKafka(kafka =>
@@ -79,6 +87,8 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
                     )
             );
         ServiceProvider = services.BuildServiceProvider();
+
+        ProcessStateStore = (LoggingProcessStateStore)ServiceProvider.GetRequiredService<IProcessStateStore>();
 
         Producer = ServiceProvider.GetRequiredService<IMessageProducer<KafkaFlowFixture>>();
 

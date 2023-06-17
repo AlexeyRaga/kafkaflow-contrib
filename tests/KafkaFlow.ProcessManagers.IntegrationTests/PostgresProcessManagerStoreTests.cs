@@ -2,6 +2,7 @@ using FluentAssertions;
 using KafkaFlow.Contrib.ProcessManagers.Postgres;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Npgsql;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests;
 
@@ -24,7 +25,9 @@ public sealed class PostgresProcessManagerStoreTests
 
         var opt = Options.Create(pgConfig!);
 
-        var store = new PostgresProcessManagersStore(opt);
+        var pool = new NpgsqlDataSourceBuilder(pgConfig!.ConnectionString).Build();
+
+        var store = new PostgresProcessManagersStore(pool);
 
         var noState = await store.Load(state.GetType(), processId);
         noState.Should().BeEquivalentTo(VersionedState.Zero);

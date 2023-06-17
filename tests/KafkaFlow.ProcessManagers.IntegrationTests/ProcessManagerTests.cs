@@ -19,7 +19,6 @@ public sealed class ProcessManagerTests : IAssemblyFixture<KafkaFlowFixture>
 
         TestUtils.RetryFor(TimeSpan.FromSeconds(30), TimeSpan.FromMicroseconds(100), () =>
         {
-            _fixture.ProcessStateStore.Current.Should().BeEmpty();
             _fixture.ProcessStateStore
                 .Changes
                 .Select(x => x.Item1)
