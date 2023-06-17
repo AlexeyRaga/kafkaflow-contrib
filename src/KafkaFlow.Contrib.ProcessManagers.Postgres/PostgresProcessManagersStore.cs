@@ -83,7 +83,7 @@ WHERE process_type = @process_type AND process_id = @process_id and xmin = @vers
 
     private sealed class ProcessStateRow
     {
-        public string process_state { get; set; }
+        public string process_state { get; set; } = null!;
         public int version { get; set; }
     }
 }

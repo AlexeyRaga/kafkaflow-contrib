@@ -21,11 +21,9 @@ public sealed class PostgresProcessManagerStoreTests
                 .AddEnvironmentVariables()
                 .Build();
 
-        var pgConfig = config.GetSection("ProcessManagers").Get<PostgresProcessManagersConfig>();
+        var connStr = config.GetConnectionString("PostgresBackend");
 
-        var opt = Options.Create(pgConfig!);
-
-        var pool = new NpgsqlDataSourceBuilder(pgConfig!.ConnectionString).Build();
+        var pool = new NpgsqlDataSourceBuilder(connStr).Build();
 
         var store = new PostgresProcessManagersStore(pool);
 

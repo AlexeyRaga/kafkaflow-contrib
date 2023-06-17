@@ -37,10 +37,8 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
             .AddEnvironmentVariables()
             .Build();
 
-        var pgConfig = config.GetSection("ProcessManagers").Get<PostgresProcessManagersConfig>();
-
-        var pool = new NpgsqlDataSourceBuilder(pgConfig!.ConnectionString).Build();
-
+        var connStr = config.GetConnectionString("PostgresBackend");
+        var pool = new NpgsqlDataSourceBuilder(connStr).Build();
 
         services
             .AddSingleton<IConfiguration>(config)
