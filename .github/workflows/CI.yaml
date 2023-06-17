@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      CONFIGURATION: Release
       # Directories
       OUTPUT_DIR: output
       TEMP_DIR: temp
@@ -41,7 +40,6 @@ jobs:
       uses: gittools/actions/gitversion/execute@v0
       with:
         useConfigFile: true
-        updateAssemblyInfo: true
 
     - name: Setup test dependencies
       run: docker compose up -d
@@ -54,7 +52,10 @@ jobs:
         dotnet build --no-restore --configuration Release \
           /property:ContinuousIntegrationBuild=True \
           /property:DeterministicSourcePaths=True \
-          /property:RepositoryUrl=https://github.com/${{ github.repository }}
+          /property:RepositoryUrl=https://github.com/${{ github.repository }} \
+          /property:AssemblyVersion=${{ env.GitVersion_AssemblySemVer }} \
+          /property:FileVersion=${{ env.GitVersion_AssemblySemFileVer }} \
+          /property:InformationalVersion=${{ env.GitVersion_InformationalVersion }}
 
     - name: Test
       run: |
@@ -66,7 +67,7 @@ jobs:
           /property:CoverletOutput=${{ env.TEST_RESULTS_DIR }}/coverlet.xml
 
     - name: Pack
-      run: dotnet pack --no-restore --no-build
+      run: dotnet pack --no-restore --no-build -p:PackageVersion=${{ steps.gitversion.outputs.NuGetVersionV2 }} -o ./packages
 
     - name: Generate reports
       run: |

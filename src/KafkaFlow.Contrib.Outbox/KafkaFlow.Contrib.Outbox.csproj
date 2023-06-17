@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>KafkaFlow.Outbox</RootNamespace>
+      <PackageVersion></PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>

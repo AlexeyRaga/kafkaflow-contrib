@@ -1,7 +1,0 @@
-<Project>
-    <PropertyGroup>
-        <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-        <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-        <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
-    </PropertyGroup>
-</Project>
