@@ -25,7 +25,7 @@ public sealed class LoggingProcessStateStore : IProcessStateStore
         return _innerStore.Load(processType, processId);
     }
 
-    public async ValueTask Delete(Type processType, Guid processId, ulong version)
+    public async ValueTask Delete(Type processType, Guid processId, int version)
     {
         await _innerStore.Delete(processType, processId, version);
         _log.Add((ActionType.Deleted, processType, processId, null));

@@ -34,7 +34,7 @@ public sealed class InMemoryProcessStateStore : IProcessStateStore
             : ValueTask.FromResult(new VersionedState(0, default));
     }
 
-    public ValueTask Delete(Type processType, Guid processId, long version)
+    public ValueTask Delete(Type processType, Guid processId, int version)
     {
         Store.TryRemove((processType, processId), out _);
         return ValueTask.CompletedTask;

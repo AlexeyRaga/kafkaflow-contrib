@@ -51,19 +51,21 @@ FROM process_managers.processes
 WHERE process_type = @process_type AND process_id = @process_id";
 
         await using var conn = _connectionPool.CreateConnection();
-        var result = await conn.ExecuteScalarAsync<ProcessStateRow?>(sql, new
+        var result = await conn.QueryAsync<ProcessStateRow>(sql, new
         {
             process_type = processType.FullName,
             process_id = processId
         });
 
-        if (result == null) return VersionedState.Zero;
+        var firstResult = result?.FirstOrDefault();
 
-        var decoded = JsonSerializer.Deserialize(result.process_state, processType);
-        return new VersionedState(result.version, decoded);
+        if (firstResult == null) return VersionedState.Zero;
+
+        var decoded = JsonSerializer.Deserialize(firstResult.process_state, processType);
+        return new VersionedState(firstResult.version, decoded);
     }
 
-    public async ValueTask Delete(Type processType, Guid processId, ulong version)
+    public async ValueTask Delete(Type processType, Guid processId, int version)
     {
         var sql = @"
 DELETE FROM process_managers.processes
@@ -82,5 +84,9 @@ WHERE process_type = @process_type AND process_id = @process_id and xmin = @vers
                 $"Concurrency error when persisting state {processType.FullName}");
     }
 
-    private sealed record ProcessStateRow(ulong version, string process_state);
+    private sealed class ProcessStateRow
+    {
+        public string process_state { get; set; }
+        public int version { get; set; }
+    }
 }

@@ -31,5 +31,5 @@ public interface IProcessStateStore
 
     ValueTask<VersionedState> Load(Type processType, Guid processId);
 
-    ValueTask Delete(Type processType, Guid processId, ulong version);
+    ValueTask Delete(Type processType, Guid processId, int version);
 }
