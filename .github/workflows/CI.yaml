@@ -73,7 +73,7 @@ jobs:
 
     - name: Generate reports
       run: |
-        if compgen -G "${{ env.TEST_RESULTS_DIR }}/*.xml" > /dev/null;
+        if compgen -G "${{ env.TEST_RESULTS_DIR }}/**/coverag*.cobertura.xml" > /dev/null;
         then
           reportgenerator \
             "-reports:${{ env.TEST_RESULTS_DIR }}/**/coverag*.cobertura.xml" \
