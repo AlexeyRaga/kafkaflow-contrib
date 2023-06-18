@@ -79,19 +79,11 @@ jobs:
         reporttypes: 'HtmlInline;Cobertura'
         historydir: ${{ env.COVERAGE_HISTORY_DIR }}
 
-#    - name: Generate reports
-#      run: |
-#        if compgen -G "${{ env.TEST_RESULTS_DIR }}/**/coverag*.cobertura.xml" > /dev/null;
-#        then
-#          reportgenerator \
-#            "-reports:${{ env.TEST_RESULTS_DIR }}/**/coverag*.cobertura.xml" \
-#            "-targetdir:${{ env.COVERAGE_REPORT_DIR }} " \
-#            "-reporttypes:XmlSummary;HtmlInline;Cobertura" \
-#            "-historydir:${{ env.COVERAGE_HISTORY_DIR }}"
-#
-#        else
-#          echo "::warning::No test results found"
-#        fi
+    - name: Upload coverage report artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: CoverageReport
+        path: ${{ env.COVERAGE_REPORT_DIR }}
 
     - name: Pack
       run: dotnet pack --no-restore --no-build -p:PackageVersion=${{ steps.gitversion.outputs.NuGetVersionV2 }} -o ./packages
