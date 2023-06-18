@@ -21,7 +21,7 @@ jobs:
       REPORTS_DIR: ./output/reports
       COVERAGE_REPORT_DIR: ./output/reports/coverage-report
       COVERAGE_HISTORY_DIR: ./temp/coverage-history
-      REPOSITORY_NAME: ${{ github.event.repository }}
+      REPOSITORY_NAME: ${{ github.event.repository.name }}
 
     steps:
     - run: echo $REPOSITORY_NAME
