@@ -22,3 +22,32 @@ ecosystem.
 
   - [KafkaFlow.Contrib.ProcessManagers.Postgres](./src/KafkaFlow.Contrib.ProcessManagers.Postgres) -
     Postgres SQL backend for storing process' state
+
+## Usage example
+
+Here is how process managers and outbox can be used together:
+
+```csharp
+services
+    // We need an NpgsqlDataSource shared between Outbox and Process Managers
+    // to be able to update state and send messages transactionally
+    .AddSingleton(myNpgsqlDataSource)
+    .AddPostgresProcessManagerState()
+    .AddPostgresOutboxBackend()
+    .AddKafka(kafka =>
+        kafka   
+            .AddCluster(cluster =>
+                cluster
+                    // The dispatcher service will be started in background
+                    .AddOutboxDispatcher(dispatcher => 
+                        // I strongly recommend to use Murmur2Random since it is
+                        // the "original" default in Java ecosystem, and is shared by other
+                        // ecosystems, like JavaScript or Python. 
+                        dispatcher.WithPartitioner(Partitioner.Murmur2Random))
+                    .AddProducer("default", producer =>
+                        producer
+                            // Make this producer go through the outbox
+                            .WithOutbox()
+                            .AddMiddlewares(m => m.AddSerializer<JsonCoreSerializer>()))
+    // and so on
+```
