@@ -21,11 +21,11 @@ jobs:
       REPORTS_DIR: ./output/reports
       COVERAGE_REPORT_DIR: ./output/reports/coverage-report
       COVERAGE_HISTORY_DIR: ./temp/coverage-history
-      REPOSITORY_NAME: ${GITHUB_REPOSITORY##*/}
+      REPOSITORY_NAME: ${{ github.event.repository }}
 
     steps:
     - run: echo $REPOSITORY_NAME
-      
+
     - uses: actions/checkout@v3
       with:
         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
