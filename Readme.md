@@ -25,6 +25,12 @@ ecosystem.
 
 ## Usage example
 
+As a pattern, [Process Managers](./src/KafkaFlow.Contrib.ProcessManagers/Readme.md)
+requires that the state _cannot_ be an eventually-consistent projection, and must be immediately consistent.
+It also requires that any messages that are published _must be_ transactionally consistent with the state changes.
+
+It means that using process managers implies using [Outbox](./src/KafkaFlow.Contrib.Outbox/Readme.md) pattern.
+
 Here is how process managers and outbox can be used together:
 
 ```csharp
@@ -35,14 +41,14 @@ services
     .AddPostgresProcessManagerState()
     .AddPostgresOutboxBackend()
     .AddKafka(kafka =>
-        kafka   
+        kafka
             .AddCluster(cluster =>
                 cluster
                     // The dispatcher service will be started in background
-                    .AddOutboxDispatcher(dispatcher => 
+                    .AddOutboxDispatcher(dispatcher =>
                         // I strongly recommend to use Murmur2Random since it is
                         // the "original" default in Java ecosystem, and is shared by other
-                        // ecosystems, like JavaScript or Python. 
+                        // ecosystems such as JavaScript or Python.
                         dispatcher.WithPartitioner(Partitioner.Murmur2Random))
                     .AddProducer("default", producer =>
                         producer
