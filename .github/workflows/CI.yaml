@@ -24,7 +24,6 @@ jobs:
       REPOSITORY_NAME: ${{ github.event.repository.name }}
 
     steps:
-    - run: echo $REPOSITORY_NAME
 
     - uses: actions/checkout@v3
       with:
@@ -65,21 +64,19 @@ jobs:
     - name: Test
       run: |
         dotnet test --no-restore --no-build \
-          --logger "trx;LogFileName=test-logs.trx" \
+          --logger "trx;LogFileName=${{ env.REPOSITORY_NAME }}.trx" \
           --results-directory ${{ env.TEST_RESULTS_DIR }} \
+          --collect:"XPlat Code Coverage" \
           /property:CollectCoverage=True \
           /property:CoverletOutputFormat=opencover \
-          /property:CoverletOutput=${{ env.TEST_RESULTS_DIR }}/coverlet.xml
-
-    - name: Pack
-      run: dotnet pack --no-restore --no-build -p:PackageVersion=${{ steps.gitversion.outputs.NuGetVersionV2 }} -o ./packages
+          /property:CoverletOutput=${{ env.TEST_RESULTS_DIR }}/${{ env.REPOSITORY_NAME }}.xml
 
     - name: Generate reports
       run: |
         if compgen -G "${{ env.TEST_RESULTS_DIR }}/*.xml" > /dev/null;
         then
           reportgenerator \
-            "-reports:${{ env.TEST_RESULTS_DIR }}/*.xml" \
+            "-reports:${{ env.TEST_RESULTS_DIR }}/**/coverag*.cobertura.xml" \
             "-targetdir:${{ env.COVERAGE_REPORT_DIR }} " \
             "-reporttypes:XmlSummary;HtmlInline;Cobertura" \
             "-historydir:${{ env.COVERAGE_HISTORY_DIR }}"
@@ -87,6 +84,9 @@ jobs:
         else
           echo "::warning::No test results found"
         fi
+
+    - name: Pack
+      run: dotnet pack --no-restore --no-build -p:PackageVersion=${{ steps.gitversion.outputs.NuGetVersionV2 }} -o ./packages
 
     - name: Teardown test dependencies
       if: always()
