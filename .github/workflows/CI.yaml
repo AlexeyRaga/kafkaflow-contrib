@@ -71,19 +71,27 @@ jobs:
           /property:CoverletOutputFormat=opencover \
           /property:CoverletOutput=${{ env.TEST_RESULTS_DIR }}/${{ env.REPOSITORY_NAME }}.xml
 
-    - name: Generate reports
-      run: |
-        if compgen -G "${{ env.TEST_RESULTS_DIR }}/**/coverag*.cobertura.xml" > /dev/null;
-        then
-          reportgenerator \
-            "-reports:${{ env.TEST_RESULTS_DIR }}/**/coverag*.cobertura.xml" \
-            "-targetdir:${{ env.COVERAGE_REPORT_DIR }} " \
-            "-reporttypes:XmlSummary;HtmlInline;Cobertura" \
-            "-historydir:${{ env.COVERAGE_HISTORY_DIR }}"
+    - name: ReportGenerator
+      uses: danielpalme/ReportGenerator-GitHub-Action@5.1.22
+      with:
+        reports: "${{ env.TEST_RESULTS_DIR }}/**/coverag*.cobertura.xml"
+        targetdir: ${{ env.COVERAGE_REPORT_DIR }}
+        reporttypes: 'HtmlInline;Cobertura'
+        historydir: ${{ env.COVERAGE_HISTORY_DIR }}
 
-        else
-          echo "::warning::No test results found"
-        fi
+#    - name: Generate reports
+#      run: |
+#        if compgen -G "${{ env.TEST_RESULTS_DIR }}/**/coverag*.cobertura.xml" > /dev/null;
+#        then
+#          reportgenerator \
+#            "-reports:${{ env.TEST_RESULTS_DIR }}/**/coverag*.cobertura.xml" \
+#            "-targetdir:${{ env.COVERAGE_REPORT_DIR }} " \
+#            "-reporttypes:XmlSummary;HtmlInline;Cobertura" \
+#            "-historydir:${{ env.COVERAGE_HISTORY_DIR }}"
+#
+#        else
+#          echo "::warning::No test results found"
+#        fi
 
     - name: Pack
       run: dotnet pack --no-restore --no-build -p:PackageVersion=${{ steps.gitversion.outputs.NuGetVersionV2 }} -o ./packages
