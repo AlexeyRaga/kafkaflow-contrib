@@ -14,7 +14,7 @@ public sealed class UserLifecycleProcessManagerTests : IAssemblyFixture<KafkaFlo
     }
 
     [Fact]
-    public async Task Should_start_fixture()
+    public async Task Should_run_user_registration_simulation()
     {
         var message = new UserRegistered(Guid.NewGuid(), "test@test.com");
         await _fixture.Producer.ProduceAsync(message.UserId.ToString(), message);

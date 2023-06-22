@@ -11,6 +11,7 @@ public sealed record UserApproved(Guid UserId);
 
 public sealed record UserAccessGranted(Guid UserId);
 
+// ReSharper disable once UnusedType.Global
 public class UserLifeCycleProcess : ProcessManager<TestState>,
     IProcessMessage<UserRegistered>,
     IProcessMessage<UserAccessGranted>,
