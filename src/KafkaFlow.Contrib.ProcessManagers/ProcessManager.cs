@@ -1,5 +1,10 @@
 namespace KafkaFlow.ProcessManagers;
 
+public interface IProcessManager
+{
+    Type StateType { get; }
+}
+
 public abstract class ProcessManager<TState> : IProcessManager where TState : class
 {
     public Type StateType => typeof(TState);
