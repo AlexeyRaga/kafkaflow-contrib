@@ -20,7 +20,7 @@ public static class ConfigurationBuilderExtensions
                     resolver,
                     resolver.Resolve<IProcessStateStore>(),
                     configuration),
-                MiddlewareLifetime.Scoped);
+                MiddlewareLifetime.Message);
     }
 
     public static IServiceCollection AddProcessManagerStateStore(

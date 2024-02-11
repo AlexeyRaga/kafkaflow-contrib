@@ -75,7 +75,7 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
                                     .WithAutoOffsetReset(AutoOffsetReset.Earliest)
                                     .AddMiddlewares(middlewares =>
                                         middlewares
-                                            .AddSerializer<JsonCoreSerializer>()
+                                            .AddDeserializer<JsonCoreDeserializer>()
                                             .AddProcessManagers(pm => pm.AddProcessManagersFromAssemblyOf<KafkaFlowFixture>())
                                         )
                             )

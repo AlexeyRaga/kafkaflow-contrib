@@ -54,6 +54,11 @@ internal sealed class OutboxProducerDecorator : IProducer<byte[], byte[]>
         ProduceAsync(topicPartition, message).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
+    public void SetSaslCredentials(string username, string password)
+    {
+        // Do nothing, storing in the outbox does not require SASL
+    }
+
     public int Poll(TimeSpan timeout) => _inner.Poll(timeout);
 
     public int Flush(TimeSpan timeout) => _inner.Flush(timeout);
@@ -86,6 +91,11 @@ internal sealed class OutboxProducerDecorator : IProducer<byte[], byte[]>
     }
 
     public void AbortTransaction()
+    {
+        throw new InvalidOperationException("This producer does not support transactions");
+    }
+
+    public void SendOffsetsToTransaction(IEnumerable<Confluent.Kafka.TopicPartitionOffset> offsets, IConsumerGroupMetadata groupMetadata, TimeSpan timeout)
     {
         throw new InvalidOperationException("This producer does not support transactions");
     }
