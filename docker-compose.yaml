@@ -59,5 +59,5 @@ services:
     restart: unless-stopped
     volumes:
       - "./local-env/postgres:/docker-entrypoint-initdb.d"
-      - "./src/KafkaFlow.Contrib.Outbox.Postgres/schema:/docker-entrypoint-initdb.d/0001.outbox"
-      - "./src/KafkaFlow.Contrib.ProcessManagers.Postgres/schema:/docker-entrypoint-initdb.d/0002.processes"
+      - "./src/Contrib.KafkaFlow.Outbox.Postgres/schema:/docker-entrypoint-initdb.d/0001.outbox"
+      - "./src/Contrib.KafkaFlow.ProcessManagers.Postgres/schema:/docker-entrypoint-initdb.d/0002.processes"
