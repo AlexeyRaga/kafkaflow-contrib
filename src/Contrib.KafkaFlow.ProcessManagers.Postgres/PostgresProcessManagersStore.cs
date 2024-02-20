@@ -1,9 +1,8 @@
 ﻿using System.Text.Json;
 using Dapper;
-using KafkaFlow.ProcessManagers;
 using Npgsql;
 
-namespace KafkaFlow.Contrib.ProcessManagers.Postgres;
+namespace KafkaFlow.ProcessManagers.Postgres;
 
 public sealed class PostgresProcessManagersStore : IProcessStateStore
 {

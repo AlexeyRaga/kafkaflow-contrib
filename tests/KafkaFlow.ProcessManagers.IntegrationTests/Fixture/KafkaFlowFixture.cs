@@ -1,8 +1,8 @@
 using Confluent.Kafka;
 using KafkaFlow.Consumers;
-using KafkaFlow.Contrib.ProcessManagers.Postgres;
 using KafkaFlow.Outbox;
 using KafkaFlow.Outbox.Postgres;
+using KafkaFlow.ProcessManagers.Postgres;
 using KafkaFlow.Serializer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

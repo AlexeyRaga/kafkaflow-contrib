@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaFlow.Contrib.ProcessManagers", "src\KafkaFlow.Contrib.ProcessManagers\KafkaFlow.Contrib.ProcessManagers.csproj", "{1DD0DA5D-63CD-4FC3-972E-CD376139810A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contrib.KafkaFlow.ProcessManagers", "src\Contrib.KafkaFlow.ProcessManagers\Contrib.KafkaFlow.ProcessManagers.csproj", "{1DD0DA5D-63CD-4FC3-972E-CD376139810A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CE99781E-E88C-404C-B9AD-D7F713265F31}"
 EndProject
@@ -8,11 +8,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A5E2EC13
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaFlow.ProcessManagers.IntegrationTests", "tests\KafkaFlow.ProcessManagers.IntegrationTests\KafkaFlow.ProcessManagers.IntegrationTests.csproj", "{F3DB8E66-BEA2-494F-B908-57C83BDF1501}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaFlow.Contrib.Outbox", "src\KafkaFlow.Contrib.Outbox\KafkaFlow.Contrib.Outbox.csproj", "{39CF3703-98C2-4EE5-872B-AEFE85EEAC9A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contrib.KafkaFlow.Outbox", "src\Contrib.KafkaFlow.Outbox\Contrib.KafkaFlow.Outbox.csproj", "{39CF3703-98C2-4EE5-872B-AEFE85EEAC9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaFlow.Contrib.Outbox.Postgres", "src\KafkaFlow.Contrib.Outbox.Postgres\KafkaFlow.Contrib.Outbox.Postgres.csproj", "{95A1F8B4-98B2-42F2-8CF1-0067F3D6B125}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contrib.KafkaFlow.Outbox.Postgres", "src\Contrib.KafkaFlow.Outbox.Postgres\Contrib.KafkaFlow.Outbox.Postgres.csproj", "{95A1F8B4-98B2-42F2-8CF1-0067F3D6B125}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaFlow.Contrib.ProcessManagers.Postgres", "src\KafkaFlow.Contrib.ProcessManagers.Postgres\KafkaFlow.Contrib.ProcessManagers.Postgres.csproj", "{6A9E74CC-3E65-4422-8E3E-862C3A999B72}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contrib.KafkaFlow.ProcessManagers.Postgres", "src\Contrib.KafkaFlow.ProcessManagers.Postgres\Contrib.KafkaFlow.ProcessManagers.Postgres.csproj", "{6A9E74CC-3E65-4422-8E3E-862C3A999B72}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

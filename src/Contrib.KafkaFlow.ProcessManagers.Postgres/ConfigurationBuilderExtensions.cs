@@ -1,7 +1,7 @@
 using KafkaFlow.ProcessManagers;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace KafkaFlow.Contrib.ProcessManagers.Postgres;
+namespace KafkaFlow.ProcessManagers.Postgres;
 
 public static class ConfigurationBuilderExtensions
 {

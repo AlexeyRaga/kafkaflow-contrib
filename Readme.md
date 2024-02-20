@@ -3,33 +3,33 @@
 This project contains a set of libraries that contribute to [KafkaFlow](https://github.com/Farfetch/kafkaflow)
 ecosystem.
 
-- [KafkaFlow.Contrib.Outbox](./src/KafkaFlow.Contrib.Outbox/Readme.md)
+- [Contrib.KafkaFlow.Outbox](./src/KafkaFlow.Outbox/Readme.md)
 
   is a library to provide [transactional outbox](https://microservices.io/patterns/data/transactional-outbox.html)
   for KafkaFlow.
 
   The following backends are implemented:
 
-  - [KafkaFlow.Contrib.Outbox.Postgres](./src/KafkaFlow.Contrib.Outbox.Postgres) - Postgres SQL backend
+  - [Contrib.KafkaFlow.Outbox.Postgres](./src/KafkaFlow.Outbox.Postgres) - Postgres SQL backend
 
 
-- [KafkaFlow.Contrib.ProcessManagers](./src/KafkaFlow.Contrib.ProcessManagers/Readme.md)
+- [Contrib.KafkaFlow.ProcessManagers](./src/KafkaFlow.ProcessManagers/Readme.md)
 
   is a library that provides [Process Managers](https://www.enterpriseintegrationpatterns.com/patterns/messaging/ProcessManager.html)
-  functionality (sometimes also called [Sagas](./src/KafkaFlow.Contrib.ProcessManagers/docs/pm-or-saga.md)).
+  funContrib.ctionality (sometimes also called [Sagas](./src/KafkaFlow.ProcessManagers/docs/pm-or-saga.md)).
 
   The following backends are implemented:
 
-  - [KafkaFlow.Contrib.ProcessManagers.Postgres](./src/KafkaFlow.Contrib.ProcessManagers.Postgres) -
+  - [Contrib.KafkaFlow.ProcessManagers.Postgres](./src/KafkaFlow.ProcessManagers.Postgres) -
     Postgres SQL backend for storing process' state
 
 ## Usage example
 
-As a pattern, [Process Managers](./src/KafkaFlow.Contrib.ProcessManagers/Readme.md)
+As Contrib.a pattern, [Process Managers](./src/KafkaFlow.ProcessManagers/Readme.md)
 requires that the state _cannot_ be an eventually-consistent projection, and must be immediately consistent.
 It also requires that any messages that are published _must be_ transactionally consistent with the state changes.
 
-It means that using process managers implies using [Outbox](./src/KafkaFlow.Contrib.Outbox/Readme.md) pattern.
+It Contrib.means that using process managers implies using [Outbox](./src/KafkaFlow.Outbox/Readme.md) pattern.
 
 Here is how process managers and outbox can be used together:
 

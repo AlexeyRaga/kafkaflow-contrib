@@ -4,11 +4,11 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>KafkaFlow.Outbox.Postgres</RootNamespace>
+        <RootNamespace>KafkaFlow.ProcessManagers.Postgres</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\KafkaFlow.Contrib.Outbox\KafkaFlow.Contrib.Outbox.csproj" />
+      <ProjectReference Include="..\Contrib.KafkaFlow.ProcessManagers\Contrib.KafkaFlow.ProcessManagers.csproj" />
     </ItemGroup>
 
     <ItemGroup>

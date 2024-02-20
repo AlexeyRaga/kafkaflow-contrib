@@ -1,5 +1,5 @@
 using FluentAssertions;
-using KafkaFlow.Contrib.ProcessManagers.Postgres;
+using KafkaFlow.ProcessManagers.Postgres;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 
