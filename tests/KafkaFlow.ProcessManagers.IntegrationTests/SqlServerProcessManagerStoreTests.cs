@@ -1,8 +1,7 @@
 ﻿using FluentAssertions;
 using KafkaFlow.ProcessManagers.SqlServer;
-using KafkaFlow.SqlServer;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests;
 public sealed class SqlServerProcessManagerStoreTests
@@ -20,9 +19,11 @@ public sealed class SqlServerProcessManagerStoreTests
                 .AddEnvironmentVariables()
                 .Build();
 
-        var connStr = config.GetConnectionString("SqlServerBackend");
+        var services = new ServiceCollection();
+        services.AddSqlServerProcessManagerState(config.GetConnectionString("SqlServerBackend"));
+        var sp = services.BuildServiceProvider();
 
-        var store = new SqlServerProcessManagersStore(Options.Create(new SqlServerOptions { ConnectionString = connStr }));
+        var store = sp.GetRequiredService<IProcessStateStore>();
 
         var noState = await store.Load(state.GetType(), processId);
         noState.Should().BeEquivalentTo(VersionedState.Zero);

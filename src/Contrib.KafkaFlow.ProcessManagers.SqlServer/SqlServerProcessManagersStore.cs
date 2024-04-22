@@ -8,9 +8,9 @@ namespace KafkaFlow.ProcessManagers.SqlServer;
 
 public sealed class SqlServerProcessManagersStore : IProcessStateStore
 {
-    private readonly SqlServerOptions _options;
+    private readonly SqlServerBackendOptions _options;
 
-    public SqlServerProcessManagersStore(IOptions<SqlServerOptions> options)
+    public SqlServerProcessManagersStore(IOptions<SqlServerBackendOptions> options)
         => _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
     public async ValueTask Persist(Type processType, Guid processId, VersionedState state)

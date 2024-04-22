@@ -4,12 +4,10 @@ using KafkaFlow.Outbox;
 using KafkaFlow.Outbox.SqlServer;
 using KafkaFlow.ProcessManagers.SqlServer;
 using KafkaFlow.Serializer;
-using KafkaFlow.SqlServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
 
@@ -38,13 +36,10 @@ public class SqlServerKafkaFlowFixture : IDisposable, IAsyncDisposable
             .AddEnvironmentVariables()
             .Build();
 
-        var connStr = config.GetConnectionString("SqlServerBackend");
-
         services
             .AddSingleton<IConfiguration>(config)
-            .AddSingleton(Options.Create(new SqlServerOptions { ConnectionString = connStr }))
             .AddLogging(log => log.AddConsole().AddDebug())
-            .AddSqlServerProcessManagerState()
+            .AddSqlServerProcessManagerState(config.GetConnectionString("SqlServerBackend"))
             .Decorate<IProcessStateStore, LoggingProcessStateStore>()
             .AddSqlServerOutboxBackend()
             .AddKafka(kafka =>
