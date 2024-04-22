@@ -3,11 +3,11 @@ using KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests.UserLifeCycle;
 
-public sealed class UserLifecycleProcessManagerTests : IAssemblyFixture<KafkaFlowFixture>
+public sealed class PostgresUserLifecycleProcessManagerTests : IAssemblyFixture<PostgresKafkaFlowFixture>
 {
-    private readonly KafkaFlowFixture _fixture;
+    private readonly PostgresKafkaFlowFixture _fixture;
 
-    public UserLifecycleProcessManagerTests(KafkaFlowFixture fixture)
+    public PostgresUserLifecycleProcessManagerTests(PostgresKafkaFlowFixture fixture)
     {
         _fixture = fixture ?? throw new ArgumentNullException(nameof(fixture));
         _fixture.ProcessStateStore.ClearChanges();
