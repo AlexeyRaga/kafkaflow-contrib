@@ -43,7 +43,7 @@ services:
       - KAFKA_SCHEMAREGISTRY_ENABLED=TRUE
       - KAFKA_SCHEMAREGISTRY_URLS=http://kafka:8081
 
-  db:
+  postgres:
     image: public.ecr.aws/docker/library/postgres:14.7-alpine
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
