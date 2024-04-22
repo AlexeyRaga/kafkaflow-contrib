@@ -9,10 +9,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="KafkaFlow.Abstractions" Version="3.0.3" />
-      <PackageReference Include="KafkaFlow.Microsoft.DependencyInjection" Version="3.0.3" />
+      <PackageReference Include="KafkaFlow.Abstractions" Version="3.0.7" />
+      <PackageReference Include="KafkaFlow.Microsoft.DependencyInjection" Version="3.0.7" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
     </ItemGroup>
 
 </Project>
