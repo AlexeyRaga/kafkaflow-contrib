@@ -86,7 +86,9 @@ public sealed class PostgresProcessManagersStore(NpgsqlDataSource connectionPool
 
     private sealed class ProcessStateRow
     {
+#pragma warning disable IDE1006 // Naming Styles
         public string process_state { get; set; } = null!;
         public int version { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
     }
 }

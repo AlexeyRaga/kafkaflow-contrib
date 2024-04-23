@@ -39,7 +39,7 @@ public class SqlServerKafkaFlowFixture : IDisposable, IAsyncDisposable
         services
             .AddSingleton<IConfiguration>(config)
             .AddLogging(log => log.AddConsole().AddDebug())
-            .AddSqlServerProcessManagerState(config.GetConnectionString("SqlServerBackend"))
+            .AddSqlServerProcessManagerState(config.GetConnectionString("SqlServerBackend")!)
             .Decorate<IProcessStateStore, LoggingProcessStateStore>()
             .AddSqlServerOutboxBackend()
             .AddKafka(kafka =>
