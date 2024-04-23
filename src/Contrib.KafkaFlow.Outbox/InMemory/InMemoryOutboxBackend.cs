@@ -1,5 +1,5 @@
-using System.Collections.Concurrent;
 using Confluent.Kafka;
+using System.Collections.Concurrent;
 
 namespace KafkaFlow.Outbox.InMemory;
 
@@ -10,7 +10,7 @@ public sealed class InMemoryOutboxBackend : IOutboxBackend
     public ValueTask Store(TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)
     {
         _queue.Enqueue((topicPartition, message));
-        return ValueTask.CompletedTask;
+        return default;
     }
 
     public ValueTask<OutboxRecord[]> Read(int batchSize, CancellationToken token = default)
@@ -23,13 +23,17 @@ public sealed class InMemoryOutboxBackend : IOutboxBackend
                 .Select(x => x!)
                 .ToArray();
 
-        return ValueTask.FromResult(batch);
+        return new ValueTask<OutboxRecord[]>(batch);
     }
 
     public ValueTask Purge()
     {
-        _queue.Clear();
-        return ValueTask.CompletedTask;
+#if NETSTANDARD2_1_OR_GREATER
+        _queue.Clear();                         // Unfortunately .NetStandard 2.1+ is required for this
+#else
+        while (_queue.TryDequeue(out _)) { }    // So we have to do it this way
+#endif
+        return default;
     }
 
     public ValueTask<OutboxRecord[]> GetAll() => Read(int.MaxValue);
