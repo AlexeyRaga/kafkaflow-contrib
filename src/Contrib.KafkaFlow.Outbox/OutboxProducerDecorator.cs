@@ -64,9 +64,5 @@ internal sealed class OutboxProducerDecorator(IProducer<byte[], byte[]> inner, I
     public void AbortTransaction(TimeSpan timeout) => throw new InvalidOperationException("This producer does not support transactions");
 
     public void AbortTransaction() => throw new InvalidOperationException("This producer does not support transactions");
-
     public void SendOffsetsToTransaction(IEnumerable<Confluent.Kafka.TopicPartitionOffset> offsets, IConsumerGroupMetadata groupMetadata, TimeSpan timeout) => throw new InvalidOperationException("This producer does not support transactions");
-
-    public void SendOffsetsToTransaction(IEnumerable<TopicPartitionOffset> offsets,
-        IConsumerGroupMetadata groupMetadata, TimeSpan timeout) => throw new InvalidOperationException("This producer does not support transactions");
 }
