@@ -1,5 +1,5 @@
-using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
+using System.Collections.Immutable;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests.UserLifeCycle;
 
@@ -30,7 +30,7 @@ public class UserLifeCycleProcess(ILogger<UserLifeCycleProcess> logger, IMessage
         await _producer.ProduceAsync(message.UserId.ToString(), new UserApproved(message.UserId));
         await _producer.ProduceAsync(message.UserId.ToString(), new UserAccessGranted(message.UserId));
 
-        var newState = new TestState(DateTimeOffset.UtcNow, ImmutableList.Create("UserRegistered"));
+        var newState = new TestState(DateTimeOffset.UtcNow, ["UserRegistered"]);
         UpdateState(newState);
     }
 
