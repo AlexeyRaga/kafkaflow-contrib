@@ -76,6 +76,7 @@ services:
     ports:
         - "1433:1433/tcp"
     restart: unless-stopped
+    command: ["/bin/bash", "-c", "/docker-entrypoint-initdb.d/initdb.sh"]
     volumes:
       - "./local-env/mssql:/docker-entrypoint-initdb.d"
       - "./src/Contrib.KafkaFlow.Outbox.SqlServer/schema:/docker-entrypoint-initdb.d/0001.outbox"
