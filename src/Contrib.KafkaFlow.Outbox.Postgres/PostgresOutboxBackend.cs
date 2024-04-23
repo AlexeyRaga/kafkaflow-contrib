@@ -89,10 +89,12 @@ public class PostgresOutboxBackend(NpgsqlDataSource connectionPool) : IOutboxBac
 
 internal sealed class OutboxTableRow
 {
+#pragma warning disable IDE1006 // Naming Styles
     public long sequence_id { get; set; }
     public string topic_name { get; set; } = null!;
     public int? partition { get; set; }
     public byte[]? message_key { get; set; }
     public string? message_headers { get; set; }
     public byte[]? message_body { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
 }
