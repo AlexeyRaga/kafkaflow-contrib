@@ -91,7 +91,7 @@ internal sealed class OutboxProducerConfigurationBuilder(IProducerConfigurationB
     public IOutboxProducerConfigurationBuilder WithStatisticsIntervalMs(int statisticsIntervalMs) =>
         WithBuilder(x => x.WithStatisticsIntervalMs(statisticsIntervalMs));
 
-    private IOutboxProducerConfigurationBuilder WithBuilder(Action<IProducerConfigurationBuilder> action)
+    private OutboxProducerConfigurationBuilder WithBuilder(Action<IProducerConfigurationBuilder> action)
     {
         action(_builder);
         return this;
