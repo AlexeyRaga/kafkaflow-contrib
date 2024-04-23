@@ -12,19 +12,13 @@ public sealed record UserApproved(Guid UserId);
 public sealed record UserAccessGranted(Guid UserId);
 
 // ReSharper disable once UnusedType.Global
-public class UserLifeCycleProcess : ProcessManager<TestState>,
+public class UserLifeCycleProcess(ILogger<UserLifeCycleProcess> logger, IMessageProducer<ITestMessageProducer> producer) : ProcessManager<TestState>,
     IProcessMessage<UserRegistered>,
     IProcessMessage<UserAccessGranted>,
     IProcessMessage<UserApproved>
 {
-    private readonly ILogger _logger;
-    private readonly IMessageProducer<ITestMessageProducer> _producer;
-
-    public UserLifeCycleProcess(ILogger<UserLifeCycleProcess> logger, IMessageProducer<ITestMessageProducer> producer)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _producer = producer ?? throw new ArgumentNullException(nameof(producer));
-    }
+    private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IMessageProducer<ITestMessageProducer> _producer = producer ?? throw new ArgumentNullException(nameof(producer));
 
     public Guid GetProcessId(UserRegistered message) => message.UserId;
     public Guid GetProcessId(UserAccessGranted message) => message.UserId;

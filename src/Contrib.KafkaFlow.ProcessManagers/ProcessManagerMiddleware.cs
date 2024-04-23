@@ -3,21 +3,14 @@ using System.Transactions;
 
 namespace KafkaFlow.ProcessManagers;
 
-internal sealed class ProcessManagerMiddleware : IMessageMiddleware
+internal sealed class ProcessManagerMiddleware(
+    IDependencyResolver dependencyResolver,
+    IProcessStateStore stateStore,
+    ProcessManagerConfiguration configuration) : IMessageMiddleware
 {
-    private readonly IDependencyResolver _dependencyResolver;
-    private readonly IProcessStateStore _stateStore;
-    private readonly ProcessManagerConfiguration _configuration;
-
-    public ProcessManagerMiddleware(
-        IDependencyResolver dependencyResolver,
-        IProcessStateStore stateStore,
-        ProcessManagerConfiguration configuration)
-    {
-        _dependencyResolver = dependencyResolver ?? throw new ArgumentNullException(nameof(dependencyResolver));
-        _stateStore = stateStore ?? throw new ArgumentNullException(nameof(stateStore));
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-    }
+    private readonly IDependencyResolver _dependencyResolver = dependencyResolver ?? throw new ArgumentNullException(nameof(dependencyResolver));
+    private readonly IProcessStateStore _stateStore = stateStore ?? throw new ArgumentNullException(nameof(stateStore));
+    private readonly ProcessManagerConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
 
     public async Task Invoke(IMessageContext context, MiddlewareDelegate next)
     {

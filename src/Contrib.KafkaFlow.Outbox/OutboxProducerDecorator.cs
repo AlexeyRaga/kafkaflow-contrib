@@ -2,16 +2,10 @@ using Confluent.Kafka;
 
 namespace KafkaFlow.Outbox;
 
-internal sealed class OutboxProducerDecorator : IProducer<byte[], byte[]>
+internal sealed class OutboxProducerDecorator(IProducer<byte[], byte[]> inner, IOutboxBackend outbox) : IProducer<byte[], byte[]>
 {
-    private readonly IProducer<byte[], byte[]> _inner;
-    private readonly IOutboxBackend _outbox;
-
-    public OutboxProducerDecorator(IProducer<byte[], byte[]> inner, IOutboxBackend outbox)
-    {
-        _inner = inner ?? throw new ArgumentNullException(nameof(inner));
-        _outbox = outbox ?? throw new ArgumentNullException(nameof(outbox));
-    }
+    private readonly IProducer<byte[], byte[]> _inner = inner ?? throw new ArgumentNullException(nameof(inner));
+    private readonly IOutboxBackend _outbox = outbox ?? throw new ArgumentNullException(nameof(outbox));
 
     public void Dispose() => _inner.Dispose();
 
@@ -43,16 +37,10 @@ internal sealed class OutboxProducerDecorator : IProducer<byte[], byte[]>
     }
 
     public void Produce(string topic, Message<byte[], byte[]> message,
-        Action<DeliveryReport<byte[], byte[]>>? deliveryHandler = null)
-    {
-        ProduceAsync(topic, message).ConfigureAwait(false).GetAwaiter().GetResult();
-    }
+        Action<DeliveryReport<byte[], byte[]>>? deliveryHandler = null) => ProduceAsync(topic, message).ConfigureAwait(false).GetAwaiter().GetResult();
 
     public void Produce(TopicPartition topicPartition, Message<byte[], byte[]> message,
-        Action<DeliveryReport<byte[], byte[]>>? deliveryHandler = null)
-    {
-        ProduceAsync(topicPartition, message).ConfigureAwait(false).GetAwaiter().GetResult();
-    }
+        Action<DeliveryReport<byte[], byte[]>>? deliveryHandler = null) => ProduceAsync(topicPartition, message).ConfigureAwait(false).GetAwaiter().GetResult();
 
     public void SetSaslCredentials(string username, string password)
     {
@@ -65,44 +53,20 @@ internal sealed class OutboxProducerDecorator : IProducer<byte[], byte[]>
 
     public void Flush(CancellationToken cancellationToken = default) => _inner.Flush(cancellationToken);
 
-    public void InitTransactions(TimeSpan timeout)
-    {
-        throw new InvalidOperationException("This producer does not support transactions");
-    }
+    public void InitTransactions(TimeSpan timeout) => throw new InvalidOperationException("This producer does not support transactions");
 
-    public void BeginTransaction()
-    {
-        throw new InvalidOperationException("This producer does not support transactions");
-    }
+    public void BeginTransaction() => throw new InvalidOperationException("This producer does not support transactions");
 
-    public void CommitTransaction(TimeSpan timeout)
-    {
-        throw new InvalidOperationException("This producer does not support transactions");
-    }
+    public void CommitTransaction(TimeSpan timeout) => throw new InvalidOperationException("This producer does not support transactions");
 
-    public void CommitTransaction()
-    {
-        throw new InvalidOperationException("This producer does not support transactions");
-    }
+    public void CommitTransaction() => throw new InvalidOperationException("This producer does not support transactions");
 
-    public void AbortTransaction(TimeSpan timeout)
-    {
-        throw new InvalidOperationException("This producer does not support transactions");
-    }
+    public void AbortTransaction(TimeSpan timeout) => throw new InvalidOperationException("This producer does not support transactions");
 
-    public void AbortTransaction()
-    {
-        throw new InvalidOperationException("This producer does not support transactions");
-    }
+    public void AbortTransaction() => throw new InvalidOperationException("This producer does not support transactions");
 
-    public void SendOffsetsToTransaction(IEnumerable<Confluent.Kafka.TopicPartitionOffset> offsets, IConsumerGroupMetadata groupMetadata, TimeSpan timeout)
-    {
-        throw new InvalidOperationException("This producer does not support transactions");
-    }
+    public void SendOffsetsToTransaction(IEnumerable<Confluent.Kafka.TopicPartitionOffset> offsets, IConsumerGroupMetadata groupMetadata, TimeSpan timeout) => throw new InvalidOperationException("This producer does not support transactions");
 
     public void SendOffsetsToTransaction(IEnumerable<TopicPartitionOffset> offsets,
-        IConsumerGroupMetadata groupMetadata, TimeSpan timeout)
-    {
-        throw new InvalidOperationException("This producer does not support transactions");
-    }
+        IConsumerGroupMetadata groupMetadata, TimeSpan timeout) => throw new InvalidOperationException("This producer does not support transactions");
 }

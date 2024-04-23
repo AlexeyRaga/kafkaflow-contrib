@@ -4,14 +4,9 @@ using Npgsql;
 
 namespace KafkaFlow.ProcessManagers.Postgres;
 
-public sealed class PostgresProcessManagersStore : IProcessStateStore
+public sealed class PostgresProcessManagersStore(NpgsqlDataSource connectionPool) : IProcessStateStore
 {
-    private readonly NpgsqlDataSource _connectionPool;
-
-    public PostgresProcessManagersStore(NpgsqlDataSource connectionPool)
-    {
-        _connectionPool = connectionPool;
-    }
+    private readonly NpgsqlDataSource _connectionPool = connectionPool;
 
     public async ValueTask Persist(Type processType, Guid processId, VersionedState state)
     {

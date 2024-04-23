@@ -1,18 +1,13 @@
 namespace KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
 
-public sealed class LoggingProcessStateStore : IProcessStateStore
+public sealed class LoggingProcessStateStore(IProcessStateStore innerStore) : IProcessStateStore
 {
     public enum ActionType
     {
         Persisted, Deleted
     }
-    private readonly IProcessStateStore _innerStore;
+    private readonly IProcessStateStore _innerStore = innerStore ?? throw new ArgumentNullException(nameof(innerStore));
     private readonly List<(ActionType, Type, Guid, VersionedState?)> _log = new();
-
-    public LoggingProcessStateStore(IProcessStateStore innerStore)
-    {
-        _innerStore = innerStore ?? throw new ArgumentNullException(nameof(innerStore));
-    }
 
     public IReadOnlyList<(ActionType, Type, Guid, VersionedState?)> Changes => _log.AsReadOnly();
 
