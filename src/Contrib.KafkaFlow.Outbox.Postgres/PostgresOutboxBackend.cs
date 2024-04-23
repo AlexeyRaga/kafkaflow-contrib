@@ -11,9 +11,10 @@ public class PostgresOutboxBackend(NpgsqlDataSource connectionPool) : IOutboxBac
 
     public async ValueTask Store(TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)
     {
-        var sql =
-            @"INSERT INTO outbox.outbox(topic_name, partition, message_key, message_headers, message_body)
-        VALUES (@topic_name, @partition, @message_key, @message_headers, @message_body)";
+        var sql = """
+            INSERT INTO outbox.outbox(topic_name, partition, message_key, message_headers, message_body)
+            VALUES (@topic_name, @partition, @message_key, @message_headers, @message_body)
+            """;
 
         await using var conn = _connectionPool.CreateConnection();
 
@@ -35,23 +36,23 @@ public class PostgresOutboxBackend(NpgsqlDataSource connectionPool) : IOutboxBac
 
     public async ValueTask<OutboxRecord[]> Read(int batchSize, CancellationToken token = default)
     {
-        var sql = @"
-DELETE FROM outbox.outbox
-WHERE
-    sequence_id = ANY(ARRAY(
-        SELECT sequence_id FROM outbox.outbox
-        ORDER BY sequence_id
-        LIMIT @batch_size
-        FOR UPDATE
-    ))
-RETURNING
-    sequence_id,
-    topic_name,
-    partition,
-    message_key,
-    message_headers,
-    message_body
-";
+        var sql = """
+            DELETE FROM outbox.outbox
+            WHERE
+                sequence_id = ANY(ARRAY(
+                    SELECT sequence_id FROM outbox.outbox
+                    ORDER BY sequence_id
+                    LIMIT @batch_size
+                    FOR UPDATE
+                ))
+            RETURNING
+                sequence_id,
+                topic_name,
+                partition,
+                message_key,
+                message_headers,
+                message_body
+            """;
         await using var conn = _connectionPool.CreateConnection();
         var result = await conn.QueryAsync<OutboxTableRow>(sql, new { batch_size = batchSize });
 
