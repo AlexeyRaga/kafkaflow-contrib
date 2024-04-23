@@ -37,16 +37,19 @@ public class UserLifeCycleProcess(ILogger<UserLifeCycleProcess> logger, IMessage
     public async Task Handle(IMessageContext context, UserApproved message)
     {
         _logger.LogInformation("Received message: {Message}", message);
-        WithRequiredState(state =>
+
+        await WithRequiredStateAsync(state =>
         {
             var newState = state with { Log = state.Log.Add("UserApproved") };
             UpdateState(newState);
+            return Task.CompletedTask;
         });
     }
 
-    public async Task Handle(IMessageContext context, UserAccessGranted message)
+    public Task Handle(IMessageContext context, UserAccessGranted message)
     {
         _logger.LogInformation("Received message: {Message}", message);
         FinishProcess();
+        return Task.CompletedTask;
     }
 }
