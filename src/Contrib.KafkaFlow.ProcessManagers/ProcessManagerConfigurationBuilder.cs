@@ -119,7 +119,7 @@ public sealed class ProcessManagerConfigurationBuilder(IDependencyConfigurator d
         return new ProcessManagerConfiguration(_transactionMode, mapping, _beginTransaction);
     }
 
-    private List<Type> GetMessageTypes(Type processType) =>
+    private static List<Type> GetMessageTypes(Type processType) =>
         processType
             .GetInterfaces()
             .Where(x => x.IsGenericType && typeof(IProcessMessage).IsAssignableFrom(x))
