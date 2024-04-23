@@ -50,7 +50,7 @@ public class SqlServerOutboxBackend(IOptions<SqlServerBackendOptions> options) :
         using var conn = new SqlConnection(_options.ConnectionString);
         var result = await conn.QueryAsync<OutboxTableRow>(sql, new { batch_size = batchSize });
 
-        return result?.Select(ToOutboxRecord).ToArray() ?? Array.Empty<OutboxRecord>();
+        return result?.Select(ToOutboxRecord).ToArray() ?? [];
     }
 
     private static OutboxRecord ToOutboxRecord(OutboxTableRow row)

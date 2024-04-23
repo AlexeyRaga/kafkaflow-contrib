@@ -7,7 +7,7 @@ public sealed class LoggingProcessStateStore(IProcessStateStore innerStore) : IP
         Persisted, Deleted
     }
     private readonly IProcessStateStore _innerStore = innerStore ?? throw new ArgumentNullException(nameof(innerStore));
-    private readonly List<(ActionType, Type, Guid, VersionedState?)> _log = new();
+    private readonly List<(ActionType, Type, Guid, VersionedState?)> _log = [];
 
     public IReadOnlyList<(ActionType, Type, Guid, VersionedState?)> Changes => _log.AsReadOnly();
 
@@ -19,10 +19,7 @@ public sealed class LoggingProcessStateStore(IProcessStateStore innerStore) : IP
         return _innerStore.Persist(processType, processId, state);
     }
 
-    public ValueTask<VersionedState> Load(Type processType, Guid processId)
-    {
-        return _innerStore.Load(processType, processId);
-    }
+    public ValueTask<VersionedState> Load(Type processType, Guid processId) => _innerStore.Load(processType, processId);
 
     public async ValueTask Delete(Type processType, Guid processId, int version)
     {

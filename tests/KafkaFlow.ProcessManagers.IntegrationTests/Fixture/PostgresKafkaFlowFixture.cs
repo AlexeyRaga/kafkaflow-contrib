@@ -52,7 +52,7 @@ public class PostgresKafkaFlowFixture : IDisposable, IAsyncDisposable
                     .UseMicrosoftLog()
                     .AddCluster(cluster =>
                         cluster
-                            .WithBrokers(new[] { "localhost:9092 " })
+                            .WithBrokers(["localhost:9092 "])
                             .CreateTopicIfNotExists(TopicName, 3, 1)
                             .AddOutboxDispatcher(x => x.WithPartitioner(Partitioner.Murmur2Random))
                             .AddProducer<PostgresKafkaFlowFixture>(producer =>

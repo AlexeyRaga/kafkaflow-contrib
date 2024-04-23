@@ -1,8 +1,7 @@
-﻿using System.Text.Json;
-using Confluent.Kafka;
+﻿using Confluent.Kafka;
 using Dapper;
-using Microsoft.Extensions.Options;
 using Npgsql;
+using System.Text.Json;
 
 namespace KafkaFlow.Outbox.Postgres;
 
@@ -56,7 +55,7 @@ RETURNING
         await using var conn = _connectionPool.CreateConnection();
         var result = await conn.QueryAsync<OutboxTableRow>(sql, new { batch_size = batchSize });
 
-        return result?.Select(ToOutboxRecord).ToArray() ?? Array.Empty<OutboxRecord>();
+        return result?.Select(ToOutboxRecord).ToArray() ?? [];
     }
 
     private static OutboxRecord ToOutboxRecord(OutboxTableRow row)
