@@ -1,6 +1,6 @@
-﻿using System.Text.Json;
-using Dapper;
+﻿using Dapper;
 using Npgsql;
+using System.Text.Json;
 
 namespace KafkaFlow.ProcessManagers.Postgres;
 
@@ -30,8 +30,10 @@ WHERE xmin = @version
         });
 
         if (result == 0)
+        {
             throw new OptimisticConcurrencyException(processType, processId,
                 $"Concurrency error when persisting state {processType.FullName}");
+        }
     }
 
     public async ValueTask<VersionedState> Load(Type processType, Guid processId)
@@ -50,7 +52,10 @@ WHERE process_type = @process_type AND process_id = @process_id";
 
         var firstResult = result?.FirstOrDefault();
 
-        if (firstResult == null) return VersionedState.Zero;
+        if (firstResult == null)
+        {
+            return VersionedState.Zero;
+        }
 
         var decoded = JsonSerializer.Deserialize(firstResult.process_state, processType);
         return new VersionedState(firstResult.version, decoded);
@@ -67,12 +72,14 @@ WHERE process_type = @process_type AND process_id = @process_id and xmin = @vers
         {
             process_type = processType.FullName,
             process_id = processId,
-            version = version
+            version
         });
 
         if (result == 0)
+        {
             throw new OptimisticConcurrencyException(processType, processId,
                 $"Concurrency error when persisting state {processType.FullName}");
+        }
     }
 
     private sealed class ProcessStateRow
