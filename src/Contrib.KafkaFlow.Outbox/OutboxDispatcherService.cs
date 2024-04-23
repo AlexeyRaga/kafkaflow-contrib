@@ -41,7 +41,7 @@ internal sealed class OutboxDispatcherService(
         }
 
         scope.Complete();
-        return batch.Any();
+        return batch.Length != 0;
     }
 
     private static TransactionScope BeginTransaction =>
