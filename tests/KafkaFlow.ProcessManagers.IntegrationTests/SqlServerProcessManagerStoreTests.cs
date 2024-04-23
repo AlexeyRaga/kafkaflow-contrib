@@ -20,7 +20,7 @@ public sealed class SqlServerProcessManagerStoreTests
                 .Build();
 
         var services = new ServiceCollection();
-        services.AddSqlServerProcessManagerState(config.GetConnectionString("SqlServerBackend"));
+        services.AddSqlServerProcessManagerState(config.GetConnectionString("SqlServerBackend")!);
         var sp = services.BuildServiceProvider();
 
         var store = sp.GetRequiredService<IProcessStateStore>();
