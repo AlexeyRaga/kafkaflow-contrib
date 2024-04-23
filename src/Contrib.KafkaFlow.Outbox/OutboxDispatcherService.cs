@@ -1,24 +1,17 @@
-using System.Transactions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Transactions;
 
 namespace KafkaFlow.Outbox;
 
-internal sealed class OutboxDispatcherService : BackgroundService
+internal sealed class OutboxDispatcherService(
+    ILogger<OutboxDispatcherService> logger,
+    IMessageProducer<IOutboxDispatcher> producer,
+    IOutboxBackend outboxBackend) : BackgroundService
 {
-    private readonly ILogger _logger;
-    private readonly IMessageProducer<IOutboxDispatcher> _producer;
-    private readonly IOutboxBackend _outboxBackend;
-
-    public OutboxDispatcherService(
-        ILogger<OutboxDispatcherService> logger,
-        IMessageProducer<IOutboxDispatcher> producer,
-        IOutboxBackend outboxBackend)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _producer = producer ?? throw new ArgumentNullException(nameof(producer));
-        _outboxBackend = outboxBackend ?? throw new ArgumentNullException(nameof(outboxBackend));
-    }
+    private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IMessageProducer<IOutboxDispatcher> _producer = producer ?? throw new ArgumentNullException(nameof(producer));
+    private readonly IOutboxBackend _outboxBackend = outboxBackend ?? throw new ArgumentNullException(nameof(outboxBackend));
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -55,6 +48,6 @@ internal sealed class OutboxDispatcherService : BackgroundService
         new(
             scopeOption: TransactionScopeOption.RequiresNew,
             transactionOptions: new TransactionOptions
-                { IsolationLevel = IsolationLevel.ReadCommitted, Timeout = TimeSpan.FromSeconds(30) },
+            { IsolationLevel = IsolationLevel.ReadCommitted, Timeout = TimeSpan.FromSeconds(30) },
             asyncFlowOption: TransactionScopeAsyncFlowOption.Enabled);
 }

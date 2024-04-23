@@ -6,14 +6,9 @@ using Npgsql;
 
 namespace KafkaFlow.Outbox.Postgres;
 
-public class PostgresOutboxBackend : IOutboxBackend
+public class PostgresOutboxBackend(NpgsqlDataSource connectionPool) : IOutboxBackend
 {
-    private readonly NpgsqlDataSource _connectionPool;
-
-    public PostgresOutboxBackend(NpgsqlDataSource connectionPool)
-    {
-        _connectionPool = connectionPool;
-    }
+    private readonly NpgsqlDataSource _connectionPool = connectionPool;
 
     public async ValueTask Store(TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)
     {

@@ -7,12 +7,9 @@ using System.Text.Json;
 
 namespace KafkaFlow.Outbox.SqlServer;
 
-public class SqlServerOutboxBackend : IOutboxBackend
+public class SqlServerOutboxBackend(IOptions<SqlServerBackendOptions> options) : IOutboxBackend
 {
-    private readonly SqlServerBackendOptions _options;
-
-    public SqlServerOutboxBackend(IOptions<SqlServerBackendOptions> options)
-        => _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+    private readonly SqlServerBackendOptions _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
     public async ValueTask Store(TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)
     {
