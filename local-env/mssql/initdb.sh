@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+# Start SQL Server
+/opt/mssql/bin/sqlservr &
+
+# Wait for SQL to start
 TRIES=60
 DBSTATUS=1
 ERRCODE=1
@@ -14,6 +18,7 @@ while [[ $DBSTATUS -ne 0 ]] && [[ $i -lt $TRIES ]]; do
 	fi
 done
 
+sleep 5s
 if [ $DBSTATUS -ne 0 ]; then 
 	echo "SQL Server took more than $TRIES seconds to start up or one or more databases are not in an ONLINE state"
 	exit 1
@@ -38,3 +43,6 @@ find /docker-entrypoint-initdb.d -mindepth 2 -type f | sort | while read f; do
   esac
   echo
 done
+
+echo "SQL Server is running"
+sleep infinity
