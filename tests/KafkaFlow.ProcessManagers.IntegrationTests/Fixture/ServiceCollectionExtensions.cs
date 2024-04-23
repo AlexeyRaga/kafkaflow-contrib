@@ -87,13 +87,12 @@ public static class ServiceCollectionExtensions
     private static ServiceDescriptor WithFactory(this ServiceDescriptor descriptor, Func<IServiceProvider, object> factory) =>
         ServiceDescriptor.Describe(descriptor.ServiceType, factory, descriptor.Lifetime);
 
-    private static object GetInstance(this IServiceProvider provider, ServiceDescriptor descriptor) => descriptor.ImplementationInstance != null
-            ? descriptor.ImplementationInstance
-            : descriptor.ImplementationType != null
+    private static object GetInstance(this IServiceProvider provider, ServiceDescriptor descriptor)
+        => descriptor.ImplementationInstance ?? (descriptor.ImplementationType != null
             ? provider.GetServiceOrCreateInstance(descriptor.ImplementationType)
             : descriptor.ImplementationFactory == null
             ? throw new InvalidOperationException($"ImplementationFactory for '{descriptor.ServiceType.FullName}' is not set")
-            : descriptor.ImplementationFactory(provider);
+            : descriptor.ImplementationFactory(provider));
 
     private static object GetServiceOrCreateInstance(this IServiceProvider provider, Type type) =>
         ActivatorUtilities.GetServiceOrCreateInstance(provider, type);
