@@ -10,16 +10,16 @@ public sealed class PostgresProcessManagersStore(NpgsqlDataSource connectionPool
 
     public async ValueTask Persist(Type processType, Guid processId, VersionedState state)
     {
-        var sql = @"
-INSERT INTO process_managers.processes(process_type, process_id, process_state)
-VALUES (@process_type, @process_id, @process_state)
-ON CONFLICT (process_type, process_id) DO
-UPDATE
-SET
-    process_state       = EXCLUDED.process_state,
-    date_updated_utc   = (now() AT TIME ZONE 'utc')
-WHERE xmin = @version
-";
+        var sql = """
+            INSERT INTO process_managers.processes(process_type, process_id, process_state)
+            VALUES (@process_type, @process_id, @process_state)
+            ON CONFLICT (process_type, process_id) DO
+            UPDATE
+            SET
+                process_state       = EXCLUDED.process_state,
+                date_updated_utc   = (now() AT TIME ZONE 'utc')
+            WHERE xmin = @version
+            """;
         await using var conn = _connectionPool.CreateConnection();
         var result = await conn.ExecuteAsync(sql, new
         {
@@ -38,10 +38,11 @@ WHERE xmin = @version
 
     public async ValueTask<VersionedState> Load(Type processType, Guid processId)
     {
-        var sql = @"
-SELECT process_state, xmin as version
-FROM process_managers.processes
-WHERE process_type = @process_type AND process_id = @process_id";
+        var sql = """
+            SELECT process_state, xmin as version
+            FROM process_managers.processes
+            WHERE process_type = @process_type AND process_id = @process_id
+            """;
 
         await using var conn = _connectionPool.CreateConnection();
         var result = await conn.QueryAsync<ProcessStateRow>(sql, new
@@ -63,9 +64,10 @@ WHERE process_type = @process_type AND process_id = @process_id";
 
     public async ValueTask Delete(Type processType, Guid processId, int version)
     {
-        var sql = @"
-DELETE FROM process_managers.processes
-WHERE process_type = @process_type AND process_id = @process_id and xmin = @version";
+        var sql = """
+            DELETE FROM process_managers.processes
+            WHERE process_type = @process_type AND process_id = @process_id and xmin = @version
+            """;
 
         await using var conn = _connectionPool.CreateConnection();
         var result = await conn.ExecuteAsync(sql, new
