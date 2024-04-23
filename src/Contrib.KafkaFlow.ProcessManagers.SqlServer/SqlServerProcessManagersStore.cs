@@ -92,7 +92,9 @@ public sealed class SqlServerProcessManagersStore(IOptions<SqlServerBackendOptio
 
     private sealed class ProcessStateRow
     {
+#pragma warning disable IDE1006 // Naming Styles
         public required string process_state { get; set; }
         public required int version { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
     }
 }
