@@ -26,17 +26,11 @@ public static class ServiceCollectionExtensions
     /// <exception cref="ArgumentNullException">If the <paramref name="services"/> argument is <c>null</c>.</exception>
     public static IServiceCollection Decorate<TService>(this IServiceCollection services, Func<IServiceProvider, TService, TService> decorate)
     {
-        if (decorate == null)
-        {
-            throw new ArgumentNullException(nameof(decorate));
-        }
+        ArgumentNullException.ThrowIfNull(decorate);
 
-        if (decorate == null)
-        {
-            throw new ArgumentNullException(nameof(decorate));
-        }
-
-        return services == null
+        return decorate == null
+            ? throw new ArgumentNullException(nameof(decorate))
+            : services == null
             ? throw new ArgumentNullException(nameof(services))
             : services.DecorateDescriptors(typeof(TService), x => x.Decorate((provider, inner) => decorate(provider, (TService)inner)!));
     }
@@ -100,12 +94,9 @@ public static class ServiceCollectionExtensions
             return descriptor.ImplementationInstance;
         }
 
-        if (descriptor.ImplementationType != null)
-        {
-            return provider.GetServiceOrCreateInstance(descriptor.ImplementationType);
-        }
-
-        return descriptor.ImplementationFactory == null
+        return descriptor.ImplementationType != null
+            ? provider.GetServiceOrCreateInstance(descriptor.ImplementationType)
+            : descriptor.ImplementationFactory == null
             ? throw new InvalidOperationException($"ImplementationFactory for '{descriptor.ServiceType.FullName}' is not set")
             : descriptor.ImplementationFactory(provider);
     }
