@@ -16,7 +16,7 @@ public sealed class SqlServerProcessManagersStore : IProcessStateStore
     public async ValueTask Persist(Type processType, Guid processId, VersionedState state)
     {
         var sql = """
-            MERGE INTO [processes] as [target]
+            MERGE INTO [process_managers].[processes] as [target]
             USING (VALUES (@process_type, @process_id,@process_state)) AS [source] ([process_type], [process_id], [process_state])
             ON [target].[process_type] = @process_type AND [target].[process_id] = @process_id
             WHEN MATCHED AND [target].[rowversion] = @Version THEN
@@ -49,7 +49,7 @@ public sealed class SqlServerProcessManagersStore : IProcessStateStore
     {
         var sql = """
             SELECT [process_state], [rowversion] as [version]
-            FROM [processes]
+            FROM [process_managers].[processes]
             WHERE [process_type] = @process_type AND [process_id] = @process_id;
             """;
 
@@ -74,7 +74,7 @@ public sealed class SqlServerProcessManagersStore : IProcessStateStore
     public async ValueTask Delete(Type processType, Guid processId, int version)
     {
         var sql = """
-            DELETE FROM [processes]
+            DELETE FROM [process_managers].[processes]
             WHERE [process_type] = @process_type AND [process_id] = @process_id and [rowversion] = @version;
             """;
 

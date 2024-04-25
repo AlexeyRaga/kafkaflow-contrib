@@ -17,7 +17,7 @@ public class SqlServerOutboxBackend : IOutboxBackend
     public async ValueTask Store(TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)
     {
         var sql = """
-            INSERT INTO [outbox] ([topic_name], [partition], [message_key], [message_headers], [message_body])
+            INSERT INTO [outbox].[outbox] ([topic_name], [partition], [message_key], [message_headers], [message_body])
             VALUES (@topic_name, @partition, @message_key, @message_headers, @message_body);
             """;
 
@@ -42,11 +42,11 @@ public class SqlServerOutboxBackend : IOutboxBackend
     public async ValueTask<OutboxRecord[]> Read(int batchSize, CancellationToken token = default)
     {
         var sql = """
-            DELETE FROM [outbox]
+            DELETE FROM [outbox].[outbox]
             OUTPUT DELETED.*
             WHERE
                 [sequence_id] IN (
-                    SELECT TOP (@batch_size) [sequence_id] FROM [outbox]
+                    SELECT TOP (@batch_size) [sequence_id] FROM [outbox].[outbox]
                     ORDER BY [sequence_id]
                 );
             """;
