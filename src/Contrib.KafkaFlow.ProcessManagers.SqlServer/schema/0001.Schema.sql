@@ -1,5 +1,5 @@
-IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'kafkaflowtest')
+IF NOT EXISTS(SELECT * FROM sys.schemas WHERE name = 'process_managers')
 BEGIN
-	CREATE DATABASE [kafkaflowtest]
+	EXEC ('CREATE SCHEMA [process_managers] AUTHORIZATION [dbo]')
 END
 GO

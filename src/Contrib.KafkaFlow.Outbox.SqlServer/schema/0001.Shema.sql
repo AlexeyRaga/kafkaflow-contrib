@@ -1,5 +1,5 @@
-IF NOT EXISTS(SELECT * FROM sys.databases WHERE name = 'kafkaflowtest')
+IF NOT EXISTS(SELECT * FROM sys.schemas WHERE name = 'outbox')
 BEGIN
-	CREATE DATABASE [kafkaflowtest]
+	EXEC ('CREATE SCHEMA [outbox] AUTHORIZATION [dbo]')
 END
 GO
