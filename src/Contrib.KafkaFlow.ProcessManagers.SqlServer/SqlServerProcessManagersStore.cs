@@ -16,7 +16,7 @@ public sealed class SqlServerProcessManagersStore(IOptions<SqlServerBackendOptio
             MERGE INTO [processes] as [target]
             USING (VALUES (@process_type, @process_id,@process_state)) AS [source] ([process_type], [process_id], [process_state])
             ON [target].[process_type] = @process_type AND [target].[process_id] = @process_id
-            WHEN MATCHED THEN
+            WHEN MATCHED AND [target].[rowversion] = @Version THEN
              UPDATE SET
                 [process_state] = @process_state,
                 [date_updated_utc] = SYSUTCDATETIME(),
