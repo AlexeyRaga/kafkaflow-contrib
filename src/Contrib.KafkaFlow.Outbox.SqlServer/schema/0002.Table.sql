@@ -1,7 +1,7 @@
 /* Table */
-IF OBJECT_ID(N'[kafkaflowtest].[dbo].[outbox]', N'U') IS NULL
+IF OBJECT_ID(N'[outbox].[outbox]', N'U') IS NULL
 BEGIN
-    CREATE TABLE [kafkaflowtest].[dbo].[outbox](
+    CREATE TABLE [outbox].[outbox](
 	    [sequence_id] [bigint] IDENTITY(1,1) NOT NULL,
 	    [topic_name] [nvarchar](255) NOT NULL,
 	    [partition] [int] NULL,
