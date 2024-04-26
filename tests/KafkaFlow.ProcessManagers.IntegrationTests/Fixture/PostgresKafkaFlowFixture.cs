@@ -12,7 +12,7 @@ using Npgsql;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
 
-public class KafkaFlowFixture : IDisposable, IAsyncDisposable
+public class PostgresKafkaFlowFixture : IDisposable, IAsyncDisposable
 {
     public readonly string FixtureId = Guid.NewGuid().ToString();
     public string TopicName { get; }
@@ -24,10 +24,10 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
 
     public IMessageProducer Producer { get; }
 
-    public KafkaFlowFixture()
+    public PostgresKafkaFlowFixture()
     {
         _fixtureCancellation = new CancellationTokenSource();
-        TopicName = $"messages-{FixtureId}";
+        TopicName = $"pg-messages-{FixtureId}";
 
         var services = new ServiceCollection();
 
@@ -55,7 +55,7 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
                             .WithBrokers(new[] { "localhost:9092 " })
                             .CreateTopicIfNotExists(TopicName, 3, 1)
                             .AddOutboxDispatcher(x => x.WithPartitioner(Partitioner.Murmur2Random))
-                            .AddProducer<KafkaFlowFixture>(producer =>
+                            .AddProducer<PostgresKafkaFlowFixture>(producer =>
                                 producer
                                     .WithOutbox()
                                     .DefaultTopic(TopicName)
@@ -69,14 +69,14 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
                             .AddConsumer(consumer =>
                                 consumer
                                     .Topic(TopicName)
-                                    .WithGroupId($"group-{FixtureId}")
+                                    .WithGroupId($"pg-group-{FixtureId}")
                                     .WithBufferSize(100)
                                     .WithWorkersCount(1)
                                     .WithAutoOffsetReset(AutoOffsetReset.Earliest)
                                     .AddMiddlewares(middlewares =>
                                         middlewares
                                             .AddDeserializer<JsonCoreDeserializer>()
-                                            .AddProcessManagers(pm => pm.AddProcessManagersFromAssemblyOf<KafkaFlowFixture>())
+                                            .AddProcessManagers(pm => pm.AddProcessManagersFromAssemblyOf<PostgresKafkaFlowFixture>())
                                         )
                             )
                     )
@@ -85,7 +85,7 @@ public class KafkaFlowFixture : IDisposable, IAsyncDisposable
 
         ProcessStateStore = (LoggingProcessStateStore)ServiceProvider.GetRequiredService<IProcessStateStore>();
 
-        Producer = ServiceProvider.GetRequiredService<IMessageProducer<KafkaFlowFixture>>();
+        Producer = ServiceProvider.GetRequiredService<IMessageProducer<PostgresKafkaFlowFixture>>();
 
         var svc = ServiceProvider.GetServices<IHostedService>();
 

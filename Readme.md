@@ -11,6 +11,7 @@ ecosystem.
   The following backends are implemented:
 
   - [Contrib.KafkaFlow.Outbox.Postgres](./src/Contrib.KafkaFlow.Outbox.Postgres) - Postgres SQL backend
+  - [Contrib.KafkaFlow.Outbox.SqlServer](./src/Contrib.KafkaFlow.Outbox.SqlServer) - SQL Server backend
 
 
 - [Contrib.KafkaFlow.ProcessManagers](./src/Contrib.KafkaFlow.ProcessManagers/Readme.md)
@@ -22,6 +23,8 @@ ecosystem.
 
   - [Contrib.KafkaFlow.ProcessManagers.Postgres](./src/Contrib.KafkaFlow.ProcessManagers.Postgres) -
     Postgres SQL backend for storing process' state
+  - [Contrib.KafkaFlow.ProcessManagers.SqlServer](./src/Contrib.KafkaFlow.ProcessManagers.SqlServer) -
+    SQL Server backend for storing process' state
 
 ## Usage example
 

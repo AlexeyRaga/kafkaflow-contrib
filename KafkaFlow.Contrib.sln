@@ -1,18 +1,27 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contrib.KafkaFlow.ProcessManagers", "src\Contrib.KafkaFlow.ProcessManagers\Contrib.KafkaFlow.ProcessManagers.csproj", "{1DD0DA5D-63CD-4FC3-972E-CD376139810A}"
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contrib.KafkaFlow.ProcessManagers", "src\Contrib.KafkaFlow.ProcessManagers\Contrib.KafkaFlow.ProcessManagers.csproj", "{1DD0DA5D-63CD-4FC3-972E-CD376139810A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CE99781E-E88C-404C-B9AD-D7F713265F31}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A5E2EC13-2E8B-4EB3-8C0F-D252A04B42F4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaFlow.ProcessManagers.IntegrationTests", "tests\KafkaFlow.ProcessManagers.IntegrationTests\KafkaFlow.ProcessManagers.IntegrationTests.csproj", "{F3DB8E66-BEA2-494F-B908-57C83BDF1501}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KafkaFlow.ProcessManagers.IntegrationTests", "tests\KafkaFlow.ProcessManagers.IntegrationTests\KafkaFlow.ProcessManagers.IntegrationTests.csproj", "{F3DB8E66-BEA2-494F-B908-57C83BDF1501}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contrib.KafkaFlow.Outbox", "src\Contrib.KafkaFlow.Outbox\Contrib.KafkaFlow.Outbox.csproj", "{39CF3703-98C2-4EE5-872B-AEFE85EEAC9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contrib.KafkaFlow.Outbox", "src\Contrib.KafkaFlow.Outbox\Contrib.KafkaFlow.Outbox.csproj", "{39CF3703-98C2-4EE5-872B-AEFE85EEAC9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contrib.KafkaFlow.Outbox.Postgres", "src\Contrib.KafkaFlow.Outbox.Postgres\Contrib.KafkaFlow.Outbox.Postgres.csproj", "{95A1F8B4-98B2-42F2-8CF1-0067F3D6B125}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contrib.KafkaFlow.Outbox.Postgres", "src\Contrib.KafkaFlow.Outbox.Postgres\Contrib.KafkaFlow.Outbox.Postgres.csproj", "{95A1F8B4-98B2-42F2-8CF1-0067F3D6B125}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contrib.KafkaFlow.ProcessManagers.Postgres", "src\Contrib.KafkaFlow.ProcessManagers.Postgres\Contrib.KafkaFlow.ProcessManagers.Postgres.csproj", "{6A9E74CC-3E65-4422-8E3E-862C3A999B72}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contrib.KafkaFlow.ProcessManagers.Postgres", "src\Contrib.KafkaFlow.ProcessManagers.Postgres\Contrib.KafkaFlow.ProcessManagers.Postgres.csproj", "{6A9E74CC-3E65-4422-8E3E-862C3A999B72}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contrib.KafkaFlow.Outbox.SqlServer", "src\Contrib.KafkaFlow.Outbox.SqlServer\Contrib.KafkaFlow.Outbox.SqlServer.csproj", "{A4CBB313-9DCC-441E-BB44-1473CDF7A986}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Contrib.KafkaFlow.ProcessManagers.SqlServer", "src\Contrib.KafkaFlow.ProcessManagers.SqlServer\Contrib.KafkaFlow.ProcessManagers.SqlServer.csproj", "{3F0C0AD0-CFD8-4722-BF3B-6259D0878680}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contrib.KafkaFlow.SqlServer", "src\Contrib.KafkaFlow.SqlServer\Contrib.KafkaFlow.SqlServer.csproj", "{6839FA17-DF28-418B-AB5A-2249D44F4CA3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,6 +49,21 @@ Global
 		{6A9E74CC-3E65-4422-8E3E-862C3A999B72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6A9E74CC-3E65-4422-8E3E-862C3A999B72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6A9E74CC-3E65-4422-8E3E-862C3A999B72}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4CBB313-9DCC-441E-BB44-1473CDF7A986}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4CBB313-9DCC-441E-BB44-1473CDF7A986}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4CBB313-9DCC-441E-BB44-1473CDF7A986}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4CBB313-9DCC-441E-BB44-1473CDF7A986}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F0C0AD0-CFD8-4722-BF3B-6259D0878680}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F0C0AD0-CFD8-4722-BF3B-6259D0878680}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F0C0AD0-CFD8-4722-BF3B-6259D0878680}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F0C0AD0-CFD8-4722-BF3B-6259D0878680}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6839FA17-DF28-418B-AB5A-2249D44F4CA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6839FA17-DF28-418B-AB5A-2249D44F4CA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6839FA17-DF28-418B-AB5A-2249D44F4CA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6839FA17-DF28-418B-AB5A-2249D44F4CA3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{1DD0DA5D-63CD-4FC3-972E-CD376139810A} = {CE99781E-E88C-404C-B9AD-D7F713265F31}
@@ -47,5 +71,11 @@ Global
 		{39CF3703-98C2-4EE5-872B-AEFE85EEAC9A} = {CE99781E-E88C-404C-B9AD-D7F713265F31}
 		{95A1F8B4-98B2-42F2-8CF1-0067F3D6B125} = {CE99781E-E88C-404C-B9AD-D7F713265F31}
 		{6A9E74CC-3E65-4422-8E3E-862C3A999B72} = {CE99781E-E88C-404C-B9AD-D7F713265F31}
+		{A4CBB313-9DCC-441E-BB44-1473CDF7A986} = {CE99781E-E88C-404C-B9AD-D7F713265F31}
+		{3F0C0AD0-CFD8-4722-BF3B-6259D0878680} = {CE99781E-E88C-404C-B9AD-D7F713265F31}
+		{6839FA17-DF28-418B-AB5A-2249D44F4CA3} = {CE99781E-E88C-404C-B9AD-D7F713265F31}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {66EE15D8-69C4-4AFB-9EB8-6020B2D8C01A}
 	EndGlobalSection
 EndGlobal
