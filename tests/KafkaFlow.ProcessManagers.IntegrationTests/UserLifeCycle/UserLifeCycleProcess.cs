@@ -1,5 +1,5 @@
-using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
+using System.Collections.Immutable;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests.UserLifeCycle;
 
@@ -12,19 +12,13 @@ public sealed record UserApproved(Guid UserId);
 public sealed record UserAccessGranted(Guid UserId);
 
 // ReSharper disable once UnusedType.Global
-public class UserLifeCycleProcess : ProcessManager<TestState>,
+public class UserLifeCycleProcess(ILogger<UserLifeCycleProcess> logger, IMessageProducer<ITestMessageProducer> producer) : ProcessManager<TestState>,
     IProcessMessage<UserRegistered>,
     IProcessMessage<UserAccessGranted>,
     IProcessMessage<UserApproved>
 {
-    private readonly ILogger _logger;
-    private readonly IMessageProducer<ITestMessageProducer> _producer;
-
-    public UserLifeCycleProcess(ILogger<UserLifeCycleProcess> logger, IMessageProducer<ITestMessageProducer> producer)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _producer = producer ?? throw new ArgumentNullException(nameof(producer));
-    }
+    private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IMessageProducer<ITestMessageProducer> _producer = producer ?? throw new ArgumentNullException(nameof(producer));
 
     public Guid GetProcessId(UserRegistered message) => message.UserId;
     public Guid GetProcessId(UserAccessGranted message) => message.UserId;
@@ -36,23 +30,26 @@ public class UserLifeCycleProcess : ProcessManager<TestState>,
         await _producer.ProduceAsync(message.UserId.ToString(), new UserApproved(message.UserId));
         await _producer.ProduceAsync(message.UserId.ToString(), new UserAccessGranted(message.UserId));
 
-        var newState = new TestState(DateTimeOffset.UtcNow, ImmutableList.Create("UserRegistered"));
+        var newState = new TestState(DateTimeOffset.UtcNow, ["UserRegistered"]);
         UpdateState(newState);
     }
 
     public async Task Handle(IMessageContext context, UserApproved message)
     {
         _logger.LogInformation("Received message: {Message}", message);
-        WithRequiredState(state =>
+
+        await WithRequiredStateAsync(state =>
         {
             var newState = state with { Log = state.Log.Add("UserApproved") };
             UpdateState(newState);
+            return Task.CompletedTask;
         });
     }
 
-    public async Task Handle(IMessageContext context, UserAccessGranted message)
+    public Task Handle(IMessageContext context, UserAccessGranted message)
     {
         _logger.LogInformation("Received message: {Message}", message);
         FinishProcess();
+        return Task.CompletedTask;
     }
 }

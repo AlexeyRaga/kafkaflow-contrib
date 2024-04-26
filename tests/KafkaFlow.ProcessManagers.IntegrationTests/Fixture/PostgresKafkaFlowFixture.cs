@@ -52,7 +52,7 @@ public class PostgresKafkaFlowFixture : IDisposable, IAsyncDisposable
                     .UseMicrosoftLog()
                     .AddCluster(cluster =>
                         cluster
-                            .WithBrokers(new[] { "localhost:9092 " })
+                            .WithBrokers(["localhost:9092 "])
                             .CreateTopicIfNotExists(TopicName, 3, 1)
                             .AddOutboxDispatcher(x => x.WithPartitioner(Partitioner.Murmur2Random))
                             .AddProducer<PostgresKafkaFlowFixture>(producer =>
@@ -100,27 +100,34 @@ public class PostgresKafkaFlowFixture : IDisposable, IAsyncDisposable
 
     public void Dispose()
     {
-        if (!_disposedAsync)
-        {
-            DisposeAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-        }
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
-
-    private bool _disposedAsync = false;
 
     public async ValueTask DisposeAsync()
     {
-        _disposedAsync = true;
+        await DisposeAsyncCore().ConfigureAwait(false);
 
-        _fixtureCancellation.Cancel();
-        _fixtureCancellation.Dispose();
+        Dispose(disposing: false);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _fixtureCancellation.Cancel();
+            _fixtureCancellation.Dispose();
+        }
+    }
+
+    protected virtual async ValueTask DisposeAsyncCore()
+    {
         await _kafkaBus.StopAsync();
-
         foreach (var cons in ServiceProvider.GetRequiredService<IConsumerAccessor>().All)
         {
             await cons.StopAsync();
         }
-
         await ServiceProvider.DisposeAsync();
     }
 }

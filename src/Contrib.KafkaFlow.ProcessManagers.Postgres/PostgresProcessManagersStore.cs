@@ -1,30 +1,25 @@
-﻿using System.Text.Json;
-using Dapper;
+﻿using Dapper;
 using Npgsql;
+using System.Text.Json;
 
 namespace KafkaFlow.ProcessManagers.Postgres;
 
-public sealed class PostgresProcessManagersStore : IProcessStateStore
+public sealed class PostgresProcessManagersStore(NpgsqlDataSource connectionPool) : IProcessStateStore
 {
-    private readonly NpgsqlDataSource _connectionPool;
-
-    public PostgresProcessManagersStore(NpgsqlDataSource connectionPool)
-    {
-        _connectionPool = connectionPool;
-    }
+    private readonly NpgsqlDataSource _connectionPool = connectionPool;
 
     public async ValueTask Persist(Type processType, Guid processId, VersionedState state)
     {
-        var sql = @"
-INSERT INTO process_managers.processes(process_type, process_id, process_state)
-VALUES (@process_type, @process_id, @process_state)
-ON CONFLICT (process_type, process_id) DO
-UPDATE
-SET
-    process_state       = EXCLUDED.process_state,
-    date_updated_utc   = (now() AT TIME ZONE 'utc')
-WHERE xmin = @version
-";
+        var sql = """
+            INSERT INTO process_managers.processes(process_type, process_id, process_state)
+            VALUES (@process_type, @process_id, @process_state)
+            ON CONFLICT (process_type, process_id) DO
+            UPDATE
+            SET
+                process_state       = EXCLUDED.process_state,
+                date_updated_utc   = (now() AT TIME ZONE 'utc')
+            WHERE xmin = @version
+            """;
         await using var conn = _connectionPool.CreateConnection();
         var result = await conn.ExecuteAsync(sql, new
         {
@@ -35,16 +30,19 @@ WHERE xmin = @version
         });
 
         if (result == 0)
+        {
             throw new OptimisticConcurrencyException(processType, processId,
                 $"Concurrency error when persisting state {processType.FullName}");
+        }
     }
 
     public async ValueTask<VersionedState> Load(Type processType, Guid processId)
     {
-        var sql = @"
-SELECT process_state, xmin as version
-FROM process_managers.processes
-WHERE process_type = @process_type AND process_id = @process_id";
+        var sql = """
+            SELECT process_state, xmin as version
+            FROM process_managers.processes
+            WHERE process_type = @process_type AND process_id = @process_id
+            """;
 
         await using var conn = _connectionPool.CreateConnection();
         var result = await conn.QueryAsync<ProcessStateRow>(sql, new
@@ -55,7 +53,10 @@ WHERE process_type = @process_type AND process_id = @process_id";
 
         var firstResult = result?.FirstOrDefault();
 
-        if (firstResult == null) return VersionedState.Zero;
+        if (firstResult == null)
+        {
+            return VersionedState.Zero;
+        }
 
         var decoded = JsonSerializer.Deserialize(firstResult.process_state, processType);
         return new VersionedState(firstResult.version, decoded);
@@ -63,26 +64,31 @@ WHERE process_type = @process_type AND process_id = @process_id";
 
     public async ValueTask Delete(Type processType, Guid processId, int version)
     {
-        var sql = @"
-DELETE FROM process_managers.processes
-WHERE process_type = @process_type AND process_id = @process_id and xmin = @version";
+        var sql = """
+            DELETE FROM process_managers.processes
+            WHERE process_type = @process_type AND process_id = @process_id and xmin = @version
+            """;
 
         await using var conn = _connectionPool.CreateConnection();
         var result = await conn.ExecuteAsync(sql, new
         {
             process_type = processType.FullName,
             process_id = processId,
-            version = version
+            version
         });
 
         if (result == 0)
+        {
             throw new OptimisticConcurrencyException(processType, processId,
                 $"Concurrency error when persisting state {processType.FullName}");
+        }
     }
 
     private sealed class ProcessStateRow
     {
+#pragma warning disable IDE1006 // Naming Styles
         public string process_state { get; set; } = null!;
         public int version { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
     }
 }

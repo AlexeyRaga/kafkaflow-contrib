@@ -7,12 +7,9 @@ using System.Text.Json;
 
 namespace KafkaFlow.Outbox.SqlServer;
 
-public class SqlServerOutboxBackend : IOutboxBackend
+public class SqlServerOutboxBackend(IOptions<SqlServerBackendOptions> options) : IOutboxBackend
 {
-    private readonly SqlServerBackendOptions _options;
-
-    public SqlServerOutboxBackend(IOptions<SqlServerBackendOptions> options)
-        => _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+    private readonly SqlServerBackendOptions _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
     public async ValueTask Store(TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)
     {
@@ -53,7 +50,7 @@ public class SqlServerOutboxBackend : IOutboxBackend
         using var conn = new SqlConnection(_options.ConnectionString);
         var result = await conn.QueryAsync<OutboxTableRow>(sql, new { batch_size = batchSize });
 
-        return result?.Select(ToOutboxRecord).ToArray() ?? Array.Empty<OutboxRecord>();
+        return result?.Select(ToOutboxRecord).ToArray() ?? [];
     }
 
     private static OutboxRecord ToOutboxRecord(OutboxTableRow row)
@@ -86,10 +83,12 @@ public class SqlServerOutboxBackend : IOutboxBackend
 
 internal sealed class OutboxTableRow
 {
+#pragma warning disable IDE1006 // Naming Styles
     public long sequence_id { get; set; }
     public string topic_name { get; set; } = null!;
     public int? partition { get; set; }
     public byte[]? message_key { get; set; }
     public string? message_headers { get; set; }
     public byte[]? message_body { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
 }

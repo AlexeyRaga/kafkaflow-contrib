@@ -26,17 +26,11 @@ public static class ServiceCollectionExtensions
     /// <exception cref="ArgumentNullException">If the <paramref name="services"/> argument is <c>null</c>.</exception>
     public static IServiceCollection Decorate<TService>(this IServiceCollection services, Func<IServiceProvider, TService, TService> decorate)
     {
-        if (decorate == null)
-        {
-            throw new ArgumentNullException(nameof(decorate));
-        }
+        ArgumentNullException.ThrowIfNull(decorate);
 
-        if (decorate == null)
-        {
-            throw new ArgumentNullException(nameof(decorate));
-        }
-
-        return services == null
+        return decorate == null
+            ? throw new ArgumentNullException(nameof(decorate))
+            : services == null
             ? throw new ArgumentNullException(nameof(services))
             : services.DecorateDescriptors(typeof(TService), x => x.Decorate((provider, inner) => decorate(provider, (TService)inner)!));
     }
@@ -78,7 +72,7 @@ public static class ServiceCollectionExtensions
     }
 
     private static bool TryGetDescriptors(this IServiceCollection services, Type serviceType, out ICollection<ServiceDescriptor> descriptors) =>
-        (descriptors = services.Where(service => service.ServiceType == serviceType).ToArray()).Any();
+        (descriptors = services.Where(service => service.ServiceType == serviceType).ToArray()).Count != 0;
 
     private static ServiceDescriptor Decorate(this ServiceDescriptor descriptor, Type decoratorType) =>
         descriptor.WithFactory(provider => provider.CreateInstance(decoratorType, provider.GetInstance(descriptor)));
@@ -94,21 +88,11 @@ public static class ServiceCollectionExtensions
         ServiceDescriptor.Describe(descriptor.ServiceType, factory, descriptor.Lifetime);
 
     private static object GetInstance(this IServiceProvider provider, ServiceDescriptor descriptor)
-    {
-        if (descriptor.ImplementationInstance != null)
-        {
-            return descriptor.ImplementationInstance;
-        }
-
-        if (descriptor.ImplementationType != null)
-        {
-            return provider.GetServiceOrCreateInstance(descriptor.ImplementationType);
-        }
-
-        return descriptor.ImplementationFactory == null
+        => descriptor.ImplementationInstance ?? (descriptor.ImplementationType != null
+            ? provider.GetServiceOrCreateInstance(descriptor.ImplementationType)
+            : descriptor.ImplementationFactory == null
             ? throw new InvalidOperationException($"ImplementationFactory for '{descriptor.ServiceType.FullName}' is not set")
-            : descriptor.ImplementationFactory(provider);
-    }
+            : descriptor.ImplementationFactory(provider));
 
     private static object GetServiceOrCreateInstance(this IServiceProvider provider, Type type) =>
         ActivatorUtilities.GetServiceOrCreateInstance(provider, type);

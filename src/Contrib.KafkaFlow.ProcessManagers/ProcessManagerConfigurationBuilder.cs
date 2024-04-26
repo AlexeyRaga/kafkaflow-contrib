@@ -4,24 +4,19 @@ using System.Transactions;
 
 namespace KafkaFlow.ProcessManagers;
 
-public sealed class ProcessManagerConfigurationBuilder
+public sealed class ProcessManagerConfigurationBuilder(IDependencyConfigurator dependencyConfigurator)
 {
-    private readonly IDependencyConfigurator _dependencyConfigurator;
+    private readonly IDependencyConfigurator _dependencyConfigurator = dependencyConfigurator ?? throw new ArgumentNullException(nameof(dependencyConfigurator));
     private InstanceLifetime _serviceLifetime = InstanceLifetime.Transient;
-    private readonly List<Type> _processManagers = new();
+    private readonly List<Type> _processManagers = [];
     private TransactionMode _transactionMode = TransactionMode.ForEachHandler;
 
     private Func<TransactionScope> _beginTransaction =
         () => new TransactionScope(
             scopeOption: TransactionScopeOption.Required,
             transactionOptions: new TransactionOptions
-                { IsolationLevel = IsolationLevel.ReadCommitted, Timeout = TimeSpan.FromSeconds(30) },
+            { IsolationLevel = IsolationLevel.ReadCommitted, Timeout = TimeSpan.FromSeconds(30) },
             asyncFlowOption: TransactionScopeAsyncFlowOption.Enabled);
-
-    public ProcessManagerConfigurationBuilder(IDependencyConfigurator dependencyConfigurator)
-    {
-        _dependencyConfigurator = dependencyConfigurator ?? throw new ArgumentNullException(nameof(dependencyConfigurator));
-    }
 
     /// <summary>
     /// Specify how transactions should behave for process managers
@@ -30,7 +25,9 @@ public sealed class ProcessManagerConfigurationBuilder
     public ProcessManagerConfigurationBuilder WithTransactionMode(TransactionMode transactionMode)
     {
         if (!Enum.IsDefined(typeof(TransactionMode), transactionMode))
+        {
             throw new InvalidEnumArgumentException(nameof(transactionMode), (int)transactionMode, typeof(TransactionMode));
+        }
 
         _transactionMode = transactionMode;
         return this;
@@ -41,8 +38,7 @@ public sealed class ProcessManagerConfigurationBuilder
     /// </summary>
     public ProcessManagerConfigurationBuilder WithBeginTransaction(Func<TransactionScope> beginTransaction)
     {
-        if (beginTransaction == null) throw new ArgumentNullException(nameof(beginTransaction));
-        _beginTransaction = beginTransaction;
+        _beginTransaction = beginTransaction ?? throw new ArgumentNullException(nameof(beginTransaction));
         return this;
     }
 
@@ -75,7 +71,9 @@ public sealed class ProcessManagerConfigurationBuilder
     public ProcessManagerConfigurationBuilder AddProcessManager(Type type)
     {
         if (!typeof(IProcessManager).IsAssignableFrom(type))
+        {
             throw new InvalidOperationException($"Type {type.FullName} is not a ProcessManager");
+        }
 
         _processManagers.Add(type);
         return this;
@@ -114,12 +112,14 @@ public sealed class ProcessManagerConfigurationBuilder
         var mapping = new HandlerTypeMapping(maps.AsReadOnly());
 
         foreach (var processType in _processManagers)
+        {
             _dependencyConfigurator.Add(processType, processType, _serviceLifetime);
+        }
 
         return new ProcessManagerConfiguration(_transactionMode, mapping, _beginTransaction);
     }
 
-    private List<Type> GetMessageTypes(Type processType) =>
+    private static List<Type> GetMessageTypes(Type processType) =>
         processType
             .GetInterfaces()
             .Where(x => x.IsGenericType && typeof(IProcessMessage).IsAssignableFrom(x))

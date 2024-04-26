@@ -6,12 +6,9 @@ using System.Text.Json;
 
 namespace KafkaFlow.ProcessManagers.SqlServer;
 
-public sealed class SqlServerProcessManagersStore : IProcessStateStore
+public sealed class SqlServerProcessManagersStore(IOptions<SqlServerBackendOptions> options) : IProcessStateStore
 {
-    private readonly SqlServerBackendOptions _options;
-
-    public SqlServerProcessManagersStore(IOptions<SqlServerBackendOptions> options)
-        => _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+    private readonly SqlServerBackendOptions _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
     public async ValueTask Persist(Type processType, Guid processId, VersionedState state)
     {
@@ -95,7 +92,9 @@ public sealed class SqlServerProcessManagersStore : IProcessStateStore
 
     private sealed class ProcessStateRow
     {
+#pragma warning disable IDE1006 // Naming Styles
         public required string process_state { get; set; }
         public required int version { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
     }
 }

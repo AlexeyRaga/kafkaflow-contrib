@@ -61,15 +61,10 @@ public interface IOutboxProducerConfigurationBuilder
     IOutboxProducerConfigurationBuilder WithCompression(CompressionType compressionType, int? compressionLevel);
 }
 
-internal sealed class OutboxProducerConfigurationBuilder : IOutboxProducerConfigurationBuilder
+internal sealed class OutboxProducerConfigurationBuilder(IProducerConfigurationBuilder builder) : IOutboxProducerConfigurationBuilder
 {
-    private readonly IProducerConfigurationBuilder _builder;
+    private readonly IProducerConfigurationBuilder _builder = builder ?? throw new ArgumentNullException(nameof(builder));
     private readonly ProducerConfig _producerConfig = new();
-
-    public OutboxProducerConfigurationBuilder(IProducerConfigurationBuilder builder)
-    {
-        _builder = builder ?? throw new ArgumentNullException(nameof(builder));
-    }
 
     public IDependencyConfigurator DependencyConfigurator => _builder.DependencyConfigurator;
 
@@ -96,7 +91,7 @@ internal sealed class OutboxProducerConfigurationBuilder : IOutboxProducerConfig
     public IOutboxProducerConfigurationBuilder WithStatisticsIntervalMs(int statisticsIntervalMs) =>
         WithBuilder(x => x.WithStatisticsIntervalMs(statisticsIntervalMs));
 
-    private IOutboxProducerConfigurationBuilder WithBuilder(Action<IProducerConfigurationBuilder> action)
+    private OutboxProducerConfigurationBuilder WithBuilder(Action<IProducerConfigurationBuilder> action)
     {
         action(_builder);
         return this;
