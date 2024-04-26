@@ -2,15 +2,14 @@
 using KafkaFlow.SqlServer;
 using Microsoft.Extensions.Options;
 using System.Data.SqlClient;
-using System.Text.Json;
 
 namespace KafkaFlow.ProcessManagers.SqlServer;
 
-public sealed class SqlServerProcessManagersStore(IOptions<SqlServerBackendOptions> options) : IProcessStateStore
+public sealed class SqlServerProcessStateRepository(IOptions<SqlServerBackendOptions> options) : IProcessStateRepository
 {
     private readonly SqlServerBackendOptions _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
 
-    public async ValueTask Persist(Type processType, Guid processId, VersionedState state)
+    public async ValueTask<int> Persist(Type processType, string processState, Guid processId, VersionedState state)
     {
         var sql = """
             MERGE INTO [process_managers].[processes] as [target]
@@ -27,48 +26,32 @@ public sealed class SqlServerProcessManagersStore(IOptions<SqlServerBackendOptio
             """;
 
         using var conn = new SqlConnection(_options.ConnectionString);
-        var result = await conn.ExecuteAsync(sql, new
+        return await conn.ExecuteAsync(sql, new
         {
             process_type = processType.FullName,
             process_id = processId,
-            process_state = JsonSerializer.Serialize(state.State),
+            process_state = processState,
             version = state.Version
-        });
-
-        if (result == 0)
-        {
-            throw new OptimisticConcurrencyException(processType, processId,
-                $"Concurrency error when persisting state {processType.FullName}");
-        }
+        }).ConfigureAwait(false);
     }
 
-    public async ValueTask<VersionedState> Load(Type processType, Guid processId)
+    public async ValueTask<IEnumerable<ProcessStateTableRow>> Load(Type processType, Guid processId)
     {
         var sql = """
-            SELECT [process_state], [rowversion] as [version]
+            SELECT [process_state] as [ProcessState], [rowversion] as [Version]
             FROM [process_managers].[processes]
             WHERE [process_type] = @process_type AND [process_id] = @process_id;
             """;
 
         using var conn = new SqlConnection(_options.ConnectionString);
-        var result = await conn.QueryAsync<ProcessStateRow>(sql, new
+        return await conn.QueryAsync<ProcessStateTableRow>(sql, new
         {
             process_type = processType.FullName,
             process_id = processId
-        });
-
-        var firstResult = result?.FirstOrDefault();
-
-        if (firstResult == null)
-        {
-            return VersionedState.Zero;
-        }
-
-        var decoded = JsonSerializer.Deserialize(firstResult.process_state, processType);
-        return new VersionedState(firstResult.version, decoded);
+        }).ConfigureAwait(false);
     }
 
-    public async ValueTask Delete(Type processType, Guid processId, int version)
+    public async ValueTask<int> Delete(Type processType, Guid processId, int version)
     {
         var sql = """
             DELETE FROM [process_managers].[processes]
@@ -76,25 +59,11 @@ public sealed class SqlServerProcessManagersStore(IOptions<SqlServerBackendOptio
             """;
 
         using var conn = new SqlConnection(_options.ConnectionString);
-        var result = await conn.ExecuteAsync(sql, new
+        return await conn.ExecuteAsync(sql, new
         {
             process_type = processType.FullName,
             process_id = processId,
             version
-        });
-
-        if (result == 0)
-        {
-            throw new OptimisticConcurrencyException(processType, processId,
-                $"Concurrency error when persisting state {processType.FullName}");
-        }
-    }
-
-    private sealed class ProcessStateRow
-    {
-#pragma warning disable IDE1006 // Naming Styles
-        public required string process_state { get; set; }
-        public required int version { get; set; }
-#pragma warning restore IDE1006 // Naming Styles
+        }).ConfigureAwait(false);
     }
 }

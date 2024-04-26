@@ -26,7 +26,7 @@ internal sealed class OutboxDispatcherService(
                 await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
             }
         }
-        _logger.LogInformation("Outbox dispatcher service has ыещззув");
+        _logger.LogInformation("Outbox dispatcher service has stopped");
     }
 
     private async Task<bool> DispatchNextBatchAsync(CancellationToken stoppingToken)
