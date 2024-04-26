@@ -1,7 +1,7 @@
 /* Table */
 CREATE TABLE "outbox"."outbox"
 (
-    sequence_id     SERIAL    NOT NULL,
+    sequence_id     SERIAL       NOT NULL,
     topic_name      VARCHAR(255) NOT NULL,
     partition       INT NULL,
     message_key     BYTEA NULL,
