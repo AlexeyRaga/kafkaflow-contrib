@@ -7,7 +7,9 @@ namespace KafkaFlow.Outbox.SqlServer;
 public static class ConfigurationBuilderExtensions
 {
     public static IServiceCollection AddSqlServerOutboxBackend(this IServiceCollection services) =>
-        services.AddSingleton<IOutboxBackend, SqlServerOutboxBackend>();
+        services
+            .AddSingleton<IOutboxRepository, SqlServerOutboxRepository>()
+            .AddSingleton<IOutboxBackend, OutboxBackend>();
 
     public static IServiceCollection AddSqlServerOutboxBackend(this IServiceCollection services, string connectionString)
     {

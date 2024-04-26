@@ -5,5 +5,7 @@ namespace KafkaFlow.Outbox.Postgres;
 public static class ConfigurationBuilderExtensions
 {
     public static IServiceCollection AddPostgresOutboxBackend(this IServiceCollection services) =>
-        services.AddSingleton<IOutboxBackend, PostgresOutboxBackend>();
+        services
+            .AddSingleton<IOutboxRepository, PostgresOutboxRepository>()
+            .AddSingleton<IOutboxBackend, OutboxBackend>();
 }

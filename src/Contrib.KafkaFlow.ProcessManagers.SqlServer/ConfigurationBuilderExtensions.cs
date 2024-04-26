@@ -7,8 +7,9 @@ namespace KafkaFlow.ProcessManagers.SqlServer;
 public static class ConfigurationBuilderExtensions
 {
     public static IServiceCollection AddSqlServerProcessManagerState(this IServiceCollection services) =>
-        services.AddSingleton<IProcessStateStore, SqlServerProcessManagersStore>();
-
+        services
+            .AddSingleton<IProcessStateRepository, SqlServerProcessStateRepository>()
+            .AddSingleton<IProcessStateStore, ProcessManagersStore>();
 
     public static IServiceCollection AddSqlServerProcessManagerState(this IServiceCollection services, string connectionString)
     {

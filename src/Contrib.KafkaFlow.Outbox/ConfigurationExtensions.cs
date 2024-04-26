@@ -3,8 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KafkaFlow.Outbox;
 
-public interface IOutboxDispatcher {}
-
 public static class ConfigurationExtensions
 {
     public static IServiceCollection AddOutboxBackend(this IServiceCollection services, Func<IServiceProvider, IOutboxBackend> factory) =>
