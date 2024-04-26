@@ -69,7 +69,8 @@ services:
       MSSQL_SA_PASSWORD: "4YiUmU2YJ8$6eqbSXF8765Ck3"
       MSSQL_PID: Developer
     healthcheck:
-      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$${MSSQL_SA_PASSWORD}" -Q "SELECT 1" || exit 1
+      test: ["CMD", "test", "-f", "/tmp/mssql.ready"]
+#      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "$${MSSQL_SA_PASSWORD}" -Q "SELECT 1" || exit 1
       interval: 5s
       timeout: 5s
       retries: 5
