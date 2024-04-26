@@ -15,8 +15,8 @@ public sealed class PostgresProcessStateRepository(NpgsqlDataSource connectionPo
             ON CONFLICT (process_type, process_id) DO
             UPDATE
             SET
-                process_state       = EXCLUDED.process_state,
-                date_updated_utc   = (now() AT TIME ZONE 'utc')
+                process_state    = EXCLUDED.process_state,
+                date_updated_utc = (now() AT TIME ZONE 'utc')
             WHERE xmin = @version
             """;
         await using var conn = _connectionPool.CreateConnection();

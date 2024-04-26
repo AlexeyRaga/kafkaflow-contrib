@@ -31,12 +31,12 @@ public class SqlServerOutboxRepository(IOptions<SqlServerBackendOptions> options
     {
         var sql = """
             DELETE FROM [outbox].[outbox]
-            OUTPUT DELETED.sequence_id as SequenceId,
-                DELETED.topic_name as TopicName,
-                DELETED.partition as Partition,
-                DELETED.message_key as MessageKey,
-                DELETED.message_headers as MessageHeaders,
-                DELETED.message_body as MessageBody
+            OUTPUT [DELETED].[sequence_id] as [SequenceId],
+                [DELETED].[topic_name] as [TopicName],
+                [DELETED].[partition] as [Partition],
+                [DELETED].[message_key] as [MessageKey],
+                [DELETED].[message_headers] as [MessageHeaders],
+                [DELETED].[message_body] as [MessageBody]
             WHERE
                 [sequence_id] IN (
                     SELECT TOP (@batch_size) [sequence_id] FROM [outbox].[outbox]
