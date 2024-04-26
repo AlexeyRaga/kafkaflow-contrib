@@ -59,7 +59,7 @@ jobs:
           /property:InformationalVersion=${{ env.GitVersion_InformationalVersion }}
 
     - name: Setup test dependencies
-      run: docker compose up -d
+      run: docker compose up -d --wait
 
     - name: Test
       run: |
@@ -118,5 +118,3 @@ jobs:
         tag: ${{ steps.gitversion.outputs.MajorMinorPatch }}
         token: ${{ secrets.GITHUB_TOKEN }}
         generateReleaseNotes: true
-
-
