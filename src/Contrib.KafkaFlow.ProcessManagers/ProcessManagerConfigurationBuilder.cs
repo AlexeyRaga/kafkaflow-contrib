@@ -109,7 +109,7 @@ public sealed class ProcessManagerConfigurationBuilder(IDependencyConfigurator d
                 group processType by messageType)
             .ToDictionary(x => x.Key, x => x.ToList());
 
-        var mapping = new HandlerTypeMapping(maps.AsReadOnly());
+        var mapping = new HandlerTypeMapping(maps);
 
         foreach (var processType in _processManagers)
         {
