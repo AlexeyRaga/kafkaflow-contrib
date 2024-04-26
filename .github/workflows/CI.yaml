@@ -94,6 +94,7 @@ jobs:
         docker compose down
 
     - name: Publish packages
+      if: (github.ref == 'refs/heads/main')
       run: dotnet nuget push ${{ github.workspace }}/packages/**/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
 
     - name: Tag published version
