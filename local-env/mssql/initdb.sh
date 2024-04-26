@@ -13,13 +13,13 @@ echo "Waiting for SQL Server to start"
 while [[ $DBSTATUS -ne 0 ]] && [[ $i -lt $TRIES ]]; do
 	i=$((i+1))
 	DBSTATUS=$(/opt/mssql-tools/bin/sqlcmd -h -1 -t 1 -U sa -P $MSSQL_SA_PASSWORD -Q "SET NOCOUNT ON; Select COALESCE(SUM(state), 0) from sys.databases") || DBSTATUS=1
-	if [ $DBSTATUS -ne 0 ]; then 
+	if [ $DBSTATUS -ne 0 ]; then
         sleep 1s
 	fi
 done
 
 sleep 5s
-if [ $DBSTATUS -ne 0 ]; then 
+if [ $DBSTATUS -ne 0 ]; then
 	echo "SQL Server took more than $TRIES seconds to start up or one or more databases are not in an ONLINE state"
 	exit 1
 fi
@@ -44,5 +44,6 @@ find /docker-entrypoint-initdb.d -mindepth 2 -type f | sort | while read f; do
   echo
 done
 
+touch /tmp/mssql.ready
 echo "SQL Server is running"
 sleep infinity
