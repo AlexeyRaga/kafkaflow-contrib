@@ -115,7 +115,7 @@ jobs:
       if: (github.ref == 'refs/heads/main')
       with:
         name: Release ${{ steps.gitversion.outputs.MajorMinorPatch }}
-        tag: ${{ nsteps.gitversion.outputs.MajorMinorPatch }}
+        tag: ${{ steps.gitversion.outputs.MajorMinorPatch }}
         token: ${{ secrets.GITHUB_TOKEN }}
         generateReleaseNotes: true
 
