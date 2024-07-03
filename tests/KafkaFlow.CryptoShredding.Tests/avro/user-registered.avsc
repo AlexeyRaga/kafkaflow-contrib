@@ -1,0 +1,28 @@
+{
+  "name": "UserRegistered",
+  "namespace": "Contrib.KafkaFlow.CryptoShredding.TestContract",
+  "type": "record",
+  "fields": [
+    {
+      "name": "id",
+      "type": {
+        "type": "string",
+        "logicalType": "uuid"
+      }
+    },
+    {
+      "name": "email",
+      "type": {
+        "type": "string",
+        "logicalType": "encrypted-string"
+      }
+    },
+    {
+      "name": "apiKey",
+      "type": {
+        "type": "string",
+        "logicalType": "inline-encrypted-string"
+      }
+    }
+  ]
+}

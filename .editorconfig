@@ -138,3 +138,6 @@ indent_size = 2
 
 [*.csproj]
 indent_size = 2
+
+[*.avsc]
+indent_size = 2
