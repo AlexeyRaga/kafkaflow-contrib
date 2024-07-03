@@ -1,26 +1,33 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <LangVersion>12</LangVersion>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <LangVersion>latest</LangVersion>
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <AnalysisLevel>latest</AnalysisLevel>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Apache.Avro" Version="1.11.3" />
     <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="FsCheck" Version="3.0.0-rc3" />
+    <PackageReference Include="FsCheck.Xunit" Version="3.0.0-rc3" />
+    <PackageReference Include="KafkaFlow" Version="3.0.10" />
+    <PackageReference Include="KafkaFlow.Extensions.Hosting" Version="3.0.10" />
     <PackageReference Include="KafkaFlow.LogHandler.Microsoft" Version="3.0.10" />
-    <PackageReference Include="KafkaFlow.Serializer.JsonCore" Version="3.0.10" />
+    <PackageReference Include="KafkaFlow.Serializer.SchemaRegistry.ConfluentAvro" Version="3.0.10" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+    <PackageReference Include="IsExternalInit" Version="1.0.0" />
+    <PackageReference Include="xunit" Version="2.9.0" />
     <PackageReference Include="xunit.assemblyfixture" Version="2.2.0" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -33,13 +40,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Contrib.KafkaFlow.Outbox.Postgres\Contrib.KafkaFlow.Outbox.Postgres.csproj" />
-    <ProjectReference Include="..\..\src\Contrib.KafkaFlow.Outbox.SqlServer\Contrib.KafkaFlow.Outbox.SqlServer.csproj" />
-    <ProjectReference Include="..\..\src\Contrib.KafkaFlow.Outbox\Contrib.KafkaFlow.Outbox.csproj" />
-    <ProjectReference Include="..\..\src\Contrib.KafkaFlow.ProcessManagers.Postgres\Contrib.KafkaFlow.ProcessManagers.Postgres.csproj" />
-    <ProjectReference Include="..\..\src\Contrib.KafkaFlow.ProcessManagers.SqlServer\Contrib.KafkaFlow.ProcessManagers.SqlServer.csproj" />
-    <ProjectReference Include="..\..\src\Contrib.KafkaFlow.ProcessManagers\Contrib.KafkaFlow.ProcessManagers.csproj" />
-    <ProjectReference Include="..\..\src\Contrib.KafkaFlow.SqlServer\Contrib.KafkaFlow.SqlServer.csproj" />
+    <ProjectReference Include="..\..\src\Contrib.KafkaFlow.CryptoShredding.Avro\Contrib.KafkaFlow.CryptoShredding.Avro.csproj" />
+    <ProjectReference Include="..\..\src\Contrib.KafkaFlow.CryptoShredding.Avro.Analyzers\Contrib.KafkaFlow.CryptoShredding.Avro.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="avro\*.avsc" />
   </ItemGroup>
 
   <ItemGroup>
