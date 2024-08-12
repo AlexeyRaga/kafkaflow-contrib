@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+
 namespace KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
 
 public sealed class LoggingProcessStateStore(IProcessStateStore innerStore) : IProcessStateStore
@@ -7,15 +9,15 @@ public sealed class LoggingProcessStateStore(IProcessStateStore innerStore) : IP
         Persisted, Deleted
     }
     private readonly IProcessStateStore _innerStore = innerStore ?? throw new ArgumentNullException(nameof(innerStore));
-    private readonly List<(ActionType, Type, Guid, VersionedState?)> _log = [];
+    private readonly ConcurrentQueue<(ActionType, Type, Guid, VersionedState?)> _log = [];
 
-    public IReadOnlyList<(ActionType, Type, Guid, VersionedState?)> Changes => _log.AsReadOnly();
+    public IReadOnlyList<(ActionType, Type, Guid, VersionedState?)> Changes => _log.ToList().AsReadOnly();
 
     public void ClearChanges() => _log.Clear();
 
     public ValueTask Persist(Type processType, Guid processId, VersionedState state)
     {
-        _log.Add((ActionType.Persisted, processType, processId, state));
+        _log.Enqueue((ActionType.Persisted, processType, processId, state));
         return _innerStore.Persist(processType, processId, state);
     }
 
@@ -24,6 +26,6 @@ public sealed class LoggingProcessStateStore(IProcessStateStore innerStore) : IP
     public async ValueTask Delete(Type processType, Guid processId, int version)
     {
         await _innerStore.Delete(processType, processId, version);
-        _log.Add((ActionType.Deleted, processType, processId, null));
+        _log.Enqueue((ActionType.Deleted, processType, processId, null));
     }
 }
