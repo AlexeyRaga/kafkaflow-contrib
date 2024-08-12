@@ -10,9 +10,9 @@ public abstract record EncryptedString
 
     public sealed record Encrypted(string Value) : EncryptedString;
 
-    public sealed record Decrypred(string Value) : EncryptedString;
+    public sealed record Plain(string Value) : EncryptedString;
 
-    public static EncryptedString FromPlain(string value) => new Decrypred(value);
+    public static EncryptedString FromPlain(string value) => new Plain(value);
     public static EncryptedString FromEncrypted(string value) => new Encrypted(value);
 
     public bool IsEncrypted => this is Encrypted;

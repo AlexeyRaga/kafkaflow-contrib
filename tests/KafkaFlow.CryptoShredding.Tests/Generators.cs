@@ -34,7 +34,7 @@ public static class Generators
     public static Arbitrary<EncryptedString> TypedEncryptedString() =>
         ArbMap.Default.ArbFor<NonNull<string>>().Convert(
             x => EncryptedString.FromPlain(x.Item),
-            x =>  NonNull<string>.NewNonNull(((EncryptedString.Decrypred)x).Value));
+            x =>  NonNull<string>.NewNonNull(((EncryptedString.Plain)x).Value));
 
     public static Arbitrary<InlineEncryptedMessage> UserRegistered()
     {

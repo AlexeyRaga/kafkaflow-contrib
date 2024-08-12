@@ -135,11 +135,11 @@ public static class AvroCryptoShredder
         {
             switch (mode, value)
             {
-                case (EncryptionMode.Encrypt, EncryptedString.Decrypred x):
+                case (EncryptionMode.Encrypt, EncryptedString.Plain x):
                     transformedValue = new EncryptedString.Encrypted(transform(x.Value));
                     return true;
                 case (EncryptionMode.Decrypt, EncryptedString.Encrypted x):
-                    transformedValue = new EncryptedString.Decrypred(transform(x.Value));
+                    transformedValue = new EncryptedString.Plain(transform(x.Value));
                     return true;
                 default: return false;
             }
