@@ -30,7 +30,7 @@ public class EncryptedStringTests
     {
         using var encryptor = new AesKeyedEncryptor(key.ToString());
         var knownSecret = message.email;
-        var secretText = ((EncryptedString.Decrypred)knownSecret).Value;
+        var secretText = ((EncryptedString.Plain)knownSecret).Value;
 
         AvroCryptoShredder.Encrypt(encryptor, message);
 
