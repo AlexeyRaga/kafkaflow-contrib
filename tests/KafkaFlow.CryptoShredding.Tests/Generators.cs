@@ -89,11 +89,11 @@ public static class Generators
                 {
                     ["location"] = cloneSecret(secret)
                 },
-                // encryptedMap = new Dictionary<string, EncryptedString>
-                // {
-                //     ["password"] = secret.Value,
-                //     ["username"] = secret.Value
-                // },
+                encryptedMap = new Dictionary<string, EncryptedString>
+                {
+                    ["password"] = secret.Value,
+                    ["username"] = secret.Value
+                },
                 innerSecret = new() { Value = secret.Value}
             };
 
