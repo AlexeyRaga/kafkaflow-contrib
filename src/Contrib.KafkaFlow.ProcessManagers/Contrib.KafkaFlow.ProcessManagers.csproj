@@ -8,6 +8,7 @@
     <LangVersion>latest</LangVersion>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +19,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Text.Json" Version="8.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Readme.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

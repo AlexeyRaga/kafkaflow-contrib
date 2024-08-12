@@ -33,6 +33,66 @@ sensitiveData = EncryptedString.FromPlain("secret-value");
 To prevent accidental leakage of secrets, `EncryptedString.Plain` cannot be serialized to Avro. An attempt to do so will result in an
 exception.
 
+### Generating Avro types
+
+Here is an example of an Avro schema that uses encrypted secrets:
+
+```avro
+{
+  "type": "record",
+  "name": "EncryptedMessage",
+  "namespace": "TestContract",
+
+  "fields": [
+    { "name": "secret",
+      "type": { "type": "string", "logicalType": "encrypted-string" } }
+  ]
+}
+```
+
+C# types can be generated using the [avrogen](https://www.nuget.org/packages/Apache.Avro.Tools) tool
+or by using `Contrib.KafkaFlow.CryptoShredding.Avro.Analyzers` package.
+
+In both cases, make sure to register `EncryptedString` as a logical type:
+
+```csharp
+LogicalTypeFactory.Instance.Register(new EncryptedStringLogicalType());
+```
+
+### Using avrogen
+
+Install [avrogen](https://www.nuget.org/packages/Apache.Avro.Tools):
+
+```bash
+$ dotnet tool install Apache.Avro.Tools
+```
+
+Then generate C# types:
+
+```bash
+$ dotnet avrogen -s <schema-file> <output-directory>
+```
+
+### Using Avro Analyzers
+
+Reference the package in your `.csproj` file:
+
+```xml
+<PackageReference Include="Contrib.KafkaFlow.CryptoShredding.Avro.Analyzers"
+                  Version="x.x.x"
+                  OutputItemType="Analyzer"
+                  ReferenceOutputAssembly="false" />
+```
+and add `*.avsc` files:
+
+```xml
+<ItemGroup>
+    <AdditionalFiles Include="avro\*.avsc" />
+</ItemGroup>
+```
+
+C# classes will be generated automatically for all schemas in the `avro` directory.
+
 ## Encryption Process
 
 For serialization to occur, the secrets must be encrypted first, converting `EncryptedString.Plain` into `EncryptedString.Encrypted`. The
