@@ -43,7 +43,7 @@ public sealed class SqlServerProcessStateRepository(IOptions<SqlServerBackendOpt
             WHERE [process_type] = @process_type AND [process_id] = @process_id;
             """;
 
-        using var conn = new SqlConnection(_options.ConnectionString);
+        await using var conn = new SqlConnection(_options.ConnectionString);
         return await conn.QueryAsync<ProcessStateTableRow>(sql, new
         {
             process_type = processType.FullName,

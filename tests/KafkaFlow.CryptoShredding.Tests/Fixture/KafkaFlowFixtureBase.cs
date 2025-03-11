@@ -52,7 +52,7 @@ public abstract class KafkaFlowFixtureBase : IDisposable, IAsyncDisposable
                                 .AddCluster(cluster =>
                                     cluster
                                         .WithBrokers(["localhost:9092"])
-                                        .CreateTopicIfNotExists(TopicName)
+                                        .CreateTopicIfNotExists(TopicName, 1, 1)
                                         .WithSchemaRegistry(x => x.Url = "http://localhost:8081")
                                         .AddProducer<ITestMessageProducer>(producer =>
                                             producer

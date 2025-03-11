@@ -3,7 +3,7 @@ version: "3.8"
 services:
 
   redpanda:
-    image: docker.redpanda.com/redpandadata/redpanda:v23.1.9
+    image: docker.redpanda.com/redpandadata/redpanda:v25.1.3
     hostname: kafka
     environment:
       REDPANDA_DEVELOPER_MODE: true
@@ -28,20 +28,6 @@ services:
       interval: 1s
       timeout: 1s
       retries: 60
-
-  kowl:
-    image: vectorized/console:v2.2.3
-    restart: always
-    deploy:
-      replicas: 1
-    ports:
-      - "8080:8080"
-    depends_on:
-      - redpanda
-    environment:
-      - KAFKA_BROKERS=kafka:29092
-      - KAFKA_SCHEMAREGISTRY_ENABLED=TRUE
-      - KAFKA_SCHEMAREGISTRY_URLS=http://kafka:8081
 
   postgres:
     image: public.ecr.aws/docker/library/postgres:14.7-alpine
