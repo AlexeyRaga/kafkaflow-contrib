@@ -1,0 +1,56 @@
+[
+  {
+    "type": "record",
+    "name": "UserJoined",
+    "namespace": "Contrib.KafkaFlow.CryptoShredding.TestContract",
+    "fields": [
+      {
+        "name": "id",
+        "type": {
+          "type": "string",
+          "logicalType": "uuid"
+        }
+      },
+      {
+        "name": "order",
+        "type": "int"
+      }
+    ]
+  },
+  {
+    "type": "record",
+    "name": "UserDeactivated",
+    "namespace": "Contrib.KafkaFlow.CryptoShredding.TestContract",
+    "fields": [
+      {
+        "name": "id",
+        "type": {
+          "type": "string",
+          "logicalType": "uuid"
+        }
+      },
+      {
+        "name": "order",
+        "type": "int"
+      }
+    ]
+  },
+  {
+    "type": "record",
+    "name": "UserActivated",
+    "namespace": "Contrib.KafkaFlow.CryptoShredding.TestContract",
+    "fields": [
+      {
+        "name": "id",
+        "type": {
+          "type": "string",
+          "logicalType": "uuid"
+        }
+      },
+      {
+        "name": "order",
+        "type": "int"
+      }
+    ]
+  }
+]

@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using Avro;
 using Avro.Specific;
-using KafkaFlow.CryptoShredding.Avro;
 using Avro.LogicalTypes;
 
 namespace KafkaFlow.CryptoShredding.Avro;

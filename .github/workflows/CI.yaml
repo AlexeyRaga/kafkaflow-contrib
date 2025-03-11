@@ -30,7 +30,7 @@ jobs:
         fetch-depth: 0
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         global-json-file: global.json
 
@@ -80,7 +80,7 @@ jobs:
         historydir: ${{ env.COVERAGE_HISTORY_DIR }}
 
     - name: Upload coverage report artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: CoverageReport
         path: ${{ env.COVERAGE_REPORT_DIR }}
