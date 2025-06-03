@@ -3,9 +3,9 @@ using System.Text.Json;
 
 namespace KafkaFlow.Outbox;
 
-public class OutboxBackend(IOutboxRepository outboxRepository) : IOutboxBackend
+public class OutboxBackend(IOutboxRepository repository) : IOutboxBackend
 {
-    private readonly IOutboxRepository _outboxRepository = outboxRepository;
+    public ITransactionScope BeginTransaction() => repository.BeginTransaction();
 
     public async ValueTask Store(TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)
     {
@@ -14,7 +14,7 @@ public class OutboxBackend(IOutboxRepository outboxRepository) : IOutboxBackend
             ? null
             : JsonSerializer.Serialize(message.Headers.ToDictionary(x => x.Key, x => x.GetValueBytes()));
 
-        await _outboxRepository.Store(
+        await repository.Store(
             new OutboxTableRow
             (
                 topicPartition.Topic,
@@ -28,7 +28,7 @@ public class OutboxBackend(IOutboxRepository outboxRepository) : IOutboxBackend
 
     public async ValueTask<OutboxRecord[]> Read(int batchSize, CancellationToken token = default)
     {
-        var result = await _outboxRepository.Read(batchSize, token).ConfigureAwait(false);
+        var result = await repository.Read(batchSize, token).ConfigureAwait(false);
         return result?.Select(ToOutboxRecord).ToArray() ?? [];
     }
 

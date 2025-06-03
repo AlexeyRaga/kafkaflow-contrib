@@ -39,7 +39,7 @@ internal sealed class OutboxDispatcherService(
 
     private async Task<DispatchBatchResult> DispatchNextBatchAsync(CancellationToken stoppingToken)
     {
-        using var scope = BeginTransaction;
+        using var scope = _outboxBackend.BeginTransaction();
         try
         {
             var batch = await _outboxBackend.Read(10, stoppingToken).ConfigureAwait(false);
@@ -68,12 +68,6 @@ internal sealed class OutboxDispatcherService(
     private MessageHeaders? BuildHeaders(OutboxRecord record) =>
         record.Message.Headers == null ? null : new MessageHeaders(record.Message.Headers);
 
-    private static TransactionScope BeginTransaction =>
-        new(
-            scopeOption: TransactionScopeOption.RequiresNew,
-            transactionOptions: new TransactionOptions
-            { IsolationLevel = IsolationLevel.ReadCommitted, Timeout = TimeSpan.FromSeconds(30) },
-            asyncFlowOption: TransactionScopeAsyncFlowOption.Enabled);
 
     private abstract record DispatchBatchResult
     {

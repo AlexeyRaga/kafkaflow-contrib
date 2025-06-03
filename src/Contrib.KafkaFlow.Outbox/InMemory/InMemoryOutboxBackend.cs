@@ -3,9 +3,17 @@ using System.Collections.Concurrent;
 
 namespace KafkaFlow.Outbox.InMemory;
 
+file sealed class NoOpTransactionScope : ITransactionScope
+{
+    public void Complete() { }
+    public void Dispose() { }
+}
+
 public sealed class InMemoryOutboxBackend : IOutboxBackend
 {
     private readonly ConcurrentQueue<(TopicPartition, Message<byte[], byte[]>)> _queue = new();
+
+    public ITransactionScope BeginTransaction() => new NoOpTransactionScope();
 
     public ValueTask Store(TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)
     {
