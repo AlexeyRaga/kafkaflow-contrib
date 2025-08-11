@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Contrib.KafkaFlow.Outbox\Contrib.KafkaFlow.Outbox.csproj" />
+    <ProjectReference Include="..\Contrib.KafkaFlow.ProcessManagers\Contrib.KafkaFlow.ProcessManagers.csproj" />
   </ItemGroup>
 
 </Project>

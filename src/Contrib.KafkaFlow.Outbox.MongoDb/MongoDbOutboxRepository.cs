@@ -1,4 +1,5 @@
 using KafkaFlow.Outbox;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Contrib.KafkaFlow.Outbox.MongoDb;
@@ -6,11 +7,13 @@ namespace Contrib.KafkaFlow.Outbox.MongoDb;
 public class MongoDbOutboxRepository : IOutboxRepository
 {
     private readonly IMongoCollection<OutboxDocument> _collection;
+    private readonly IMongoClient _client;
     private long _sequenceCounter;
 
     public MongoDbOutboxRepository(IMongoDatabase database, string collectionName = "outbox")
     {
         _collection = database.GetCollection<OutboxDocument>(collectionName);
+        _client = database.Client;
 
         var indexKeys = Builders<OutboxDocument>.IndexKeys.Ascending(x => x.SequenceId);
         var indexModel = new CreateIndexModel<OutboxDocument>(indexKeys);
@@ -30,10 +33,12 @@ public class MongoDbOutboxRepository : IOutboxRepository
 
     public async ValueTask Store(OutboxTableRow outboxTableRow, CancellationToken token = default)
     {
+        var id = ObjectId.GenerateNewId();
         var sequenceId = Interlocked.Increment(ref _sequenceCounter);
 
         var document = new OutboxDocument
         {
+            Id = id,
             SequenceId = sequenceId,
             TopicName = outboxTableRow.TopicName,
             Partition = outboxTableRow.Partition,
@@ -43,7 +48,7 @@ public class MongoDbOutboxRepository : IOutboxRepository
             CreatedAt = DateTime.UtcNow
         };
 
-        await _collection.InsertOneAsync(document, cancellationToken: token);
+        await _collection.InsertOneAsync(document, cancellationToken: token).ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<OutboxTableRow>> Read(int batchSize, CancellationToken token = default)
@@ -54,14 +59,15 @@ public class MongoDbOutboxRepository : IOutboxRepository
         var documents = await _collection.Find(filter)
             .Sort(sort)
             .Limit(batchSize)
-            .ToListAsync(token);
+            .ToListAsync(token)
+            .ConfigureAwait(false);
 
         if (documents.Count == 0)
             return [];
 
         var documentIds = documents.Select(d => d.Id).ToList();
         var deleteFilter = Builders<OutboxDocument>.Filter.In(x => x.Id, documentIds);
-        await _collection.DeleteManyAsync(deleteFilter, token);
+        await _collection.DeleteManyAsync(deleteFilter, token).ConfigureAwait(false);
 
         return documents.Select(doc => new OutboxTableRow(
             doc.SequenceId,
@@ -75,17 +81,6 @@ public class MongoDbOutboxRepository : IOutboxRepository
 
     public ITransactionScope BeginTransaction()
     {
-        return new MongoDbTransactionScope();
-    }
-}
-
-internal sealed class MongoDbTransactionScope : ITransactionScope
-{
-    public void Complete()
-    {
-    }
-
-    public void Dispose()
-    {
+        return new MongoDbTransactionScope(_client);
     }
 }

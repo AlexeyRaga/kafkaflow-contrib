@@ -33,9 +33,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Contrib.KafkaFlow.Outbox.MongoDb\Contrib.KafkaFlow.Outbox.MongoDb.csproj" />
     <ProjectReference Include="..\..\src\Contrib.KafkaFlow.Outbox.Postgres\Contrib.KafkaFlow.Outbox.Postgres.csproj" />
     <ProjectReference Include="..\..\src\Contrib.KafkaFlow.Outbox.SqlServer\Contrib.KafkaFlow.Outbox.SqlServer.csproj" />
     <ProjectReference Include="..\..\src\Contrib.KafkaFlow.Outbox\Contrib.KafkaFlow.Outbox.csproj" />
+    <ProjectReference Include="..\..\src\Contrib.KafkaFlow.ProcessManagers.MongoDb\Contrib.KafkaFlow.ProcessManagers.MongoDb.csproj" />
     <ProjectReference Include="..\..\src\Contrib.KafkaFlow.ProcessManagers.Postgres\Contrib.KafkaFlow.ProcessManagers.Postgres.csproj" />
     <ProjectReference Include="..\..\src\Contrib.KafkaFlow.ProcessManagers.SqlServer\Contrib.KafkaFlow.ProcessManagers.SqlServer.csproj" />
     <ProjectReference Include="..\..\src\Contrib.KafkaFlow.ProcessManagers\Contrib.KafkaFlow.ProcessManagers.csproj" />
