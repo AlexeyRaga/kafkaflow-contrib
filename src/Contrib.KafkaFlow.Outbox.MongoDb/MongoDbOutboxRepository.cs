@@ -67,20 +67,27 @@ public class MongoDbOutboxRepository : IOutboxRepository
 
         var documentIds = documents.Select(d => d.Id).ToList();
         var deleteFilter = Builders<OutboxDocument>.Filter.In(x => x.Id, documentIds);
+
         await _collection.DeleteManyAsync(deleteFilter, token).ConfigureAwait(false);
 
-        return documents.Select(doc => new OutboxTableRow(
+        return documents.Select(CreateOutboxTableRow);
+    }
+
+    public ITransactionScope BeginTransaction()
+    {
+        return new MongoDbTransactionScope(_client);
+    }
+
+    private static OutboxTableRow CreateOutboxTableRow(OutboxDocument doc)
+    {
+        return new
+        (
             doc.SequenceId,
             doc.TopicName,
             doc.Partition,
             doc.MessageKey,
             doc.MessageHeaders,
             doc.MessageBody
-        ));
-    }
-
-    public ITransactionScope BeginTransaction()
-    {
-        return new MongoDbTransactionScope(_client);
+        );
     }
 }
