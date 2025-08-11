@@ -1,0 +1,5 @@
+using KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
+
+namespace KafkaFlow.ProcessManagers.IntegrationTests.UserLifeCycle;
+
+public class MongoDbUserLifecycleProcessManagerTests(MongoDbKafkaFlowFixture fixture) : UserLifecycleProcessManagerTests<MongoDbKafkaFlowFixture>(fixture);
