@@ -68,3 +68,24 @@ services:
       - "./local-env/mssql:/docker-entrypoint-initdb.d"
       - "./src/Contrib.KafkaFlow.Outbox.SqlServer/schema:/docker-entrypoint-initdb.d/0001.outbox"
       - "./src/Contrib.KafkaFlow.ProcessManagers.SqlServer/schema:/docker-entrypoint-initdb.d/0002.processes"
+
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb-1
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - mongodb_data:/data/db
+      - "./local-env/mongodb:/docker-entrypoint-initdb.d"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
