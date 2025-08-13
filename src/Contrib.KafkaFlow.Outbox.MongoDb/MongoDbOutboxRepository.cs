@@ -66,10 +66,15 @@ public class MongoDbOutboxRepository : IOutboxRepository
             return [];
         }
 
+        // Create a transaction scope - this will reuse an existing session if we're already
+        // within a transaction context, or create a new one if not
+        using var scope = MongoDbTransactionScope.Create(_client);
+        var session = MongoDbTransactionScope.CurrentSession;
+
         var filter = Builders<OutboxDocument>.Filter.Empty;
         var sort = Builders<OutboxDocument>.Sort.Ascending(x => x.SequenceId);
 
-        var documents = await _collection.Find(filter)
+        var documents = await _collection.Find(session, filter)
             .Sort(sort)
             .Limit(batchSize)
             .ToListAsync(token)
@@ -81,9 +86,12 @@ public class MongoDbOutboxRepository : IOutboxRepository
         var documentIds = documents.Select(d => d.Id).ToList();
         var deleteFilter = Builders<OutboxDocument>.Filter.In(x => x.Id, documentIds);
 
-        await _collection.DeleteManyAsync(deleteFilter, token).ConfigureAwait(false);
+        await _collection.DeleteManyAsync(session, deleteFilter, cancellationToken: token).ConfigureAwait(false);
 
-        return documents.Select(CreateOutboxTableRow);
+        var rows = documents.Select(CreateOutboxTableRow).ToList();
+
+        scope.Complete();
+        return rows;
     }
 
     private async Task<bool> TryAcquireLock(string lockName, TimeSpan lockDuration, CancellationToken token = default)
@@ -123,14 +131,11 @@ public class MongoDbOutboxRepository : IOutboxRepository
         }
     }
 
-    public ITransactionScope BeginTransaction()
-    {
-        return new MongoDbTransactionScope(_client);
-    }
+    public ITransactionScope BeginTransaction() =>
+        MongoDbTransactionScope.Create(_client);
 
-    private static OutboxTableRow CreateOutboxTableRow(OutboxDocument doc)
-    {
-        return new
+    private static OutboxTableRow CreateOutboxTableRow(OutboxDocument doc) =>
+        new
         (
             doc.SequenceId,
             doc.TopicName,
@@ -139,5 +144,4 @@ public class MongoDbOutboxRepository : IOutboxRepository
             doc.MessageHeaders,
             doc.MessageBody
         );
-    }
 }
