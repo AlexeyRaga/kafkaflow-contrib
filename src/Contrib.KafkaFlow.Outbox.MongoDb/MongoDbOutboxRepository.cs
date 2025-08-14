@@ -37,6 +37,13 @@ public class MongoDbOutboxRepository : IOutboxRepository
 
     public async ValueTask Store(OutboxTableRow outboxTableRow, CancellationToken token = default)
     {
+        // We require a transaction scope to be opened explicitly by the user before
+        // we allow using the outbox repository.
+        if (!MongoDbTransactionScope.TryGetSession(out var session))
+        {
+            throw MongoDbTransactionScopeRequiredException.ForMissingScope();
+        }
+
         var id = ObjectId.GenerateNewId();
         var sequenceId = Interlocked.Increment(ref _sequenceCounter);
 
@@ -52,11 +59,20 @@ public class MongoDbOutboxRepository : IOutboxRepository
             CreatedAt = DateTime.UtcNow
         };
 
-        await _collection.InsertOneAsync(document, cancellationToken: token).ConfigureAwait(false);
+        await _collection.InsertOneAsync(session, document, cancellationToken: token).ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<OutboxTableRow>> Read(int batchSize, CancellationToken token = default)
     {
+        // We require a transaction scope to be opened explicitly by the user before
+        // we allow using the outbox repository.
+        // In case of reading and dispatching outbox messages, we rely on a Dispatcher to
+        // manage the transaction scope.
+        if (!MongoDbTransactionScope.TryGetSession(out var session))
+        {
+            throw MongoDbTransactionScopeRequiredException.ForMissingScope();
+        }
+
         // Try to acquire the dispatcher lock
         // For now let's assume that 10 seconds is a reasonable lock duration to be able to process a batch
         var lockAcquired = await TryAcquireLock("outbox_dispatcher", TimeSpan.FromSeconds(10), token);
@@ -65,11 +81,6 @@ public class MongoDbOutboxRepository : IOutboxRepository
             // Couldn't acquire lock - another instance is dispatching
             return [];
         }
-
-        // Create a transaction scope - this will reuse an existing session if we're already
-        // within a transaction context, or create a new one if not
-        using var scope = MongoDbTransactionScope.Create(_client);
-        var session = MongoDbTransactionScope.CurrentSession;
 
         var filter = Builders<OutboxDocument>.Filter.Empty;
         var sort = Builders<OutboxDocument>.Sort.Ascending(x => x.SequenceId);
@@ -80,8 +91,7 @@ public class MongoDbOutboxRepository : IOutboxRepository
             .ToListAsync(token)
             .ConfigureAwait(false);
 
-        if (documents.Count == 0)
-            return [];
+        if (documents.Count == 0) return [];
 
         var documentIds = documents.Select(d => d.Id).ToList();
         var deleteFilter = Builders<OutboxDocument>.Filter.In(x => x.Id, documentIds);
@@ -90,7 +100,6 @@ public class MongoDbOutboxRepository : IOutboxRepository
 
         var rows = documents.Select(CreateOutboxTableRow).ToList();
 
-        scope.Complete();
         return rows;
     }
 
