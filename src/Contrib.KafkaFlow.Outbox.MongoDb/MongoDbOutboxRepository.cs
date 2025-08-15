@@ -40,9 +40,7 @@ public class MongoDbOutboxRepository : IOutboxRepository
         // We require a transaction scope to be opened explicitly by the user before
         // we allow using the outbox repository.
         if (!MongoDbTransactionScope.TryGetSession(out var session))
-        {
             throw MongoDbTransactionScopeRequiredException.ForMissingScope();
-        }
 
         var id = ObjectId.GenerateNewId();
         var sequenceId = Interlocked.Increment(ref _sequenceCounter);
@@ -69,9 +67,7 @@ public class MongoDbOutboxRepository : IOutboxRepository
         // In case of reading and dispatching outbox messages, we rely on a Dispatcher to
         // manage the transaction scope.
         if (!MongoDbTransactionScope.TryGetSession(out var session))
-        {
             throw MongoDbTransactionScopeRequiredException.ForMissingScope();
-        }
 
         // Try to acquire the dispatcher lock
         // For now let's assume that 10 seconds is a reasonable lock duration to be able to process a batch

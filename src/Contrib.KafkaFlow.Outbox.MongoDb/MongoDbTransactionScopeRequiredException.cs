@@ -47,7 +47,7 @@ public sealed class MongoDbTransactionScopeRequiredException : Exception
     /// that includes guidance for nested scope scenarios.
     /// </summary>
     /// <returns>A new <see cref="MongoDbTransactionScopeRequiredException"/> instance.</returns>
-    internal static MongoDbTransactionScopeRequiredException ForMissingScope() =>
+    public static MongoDbTransactionScopeRequiredException ForMissingScope() =>
         new(
             "No active MongoDbTransactionScope found in the current execution context. " +
             "MongoDB outbox operations require an active transaction scope. " +

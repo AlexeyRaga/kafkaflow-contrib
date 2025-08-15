@@ -2,6 +2,7 @@
 using KafkaFlow.SqlServer;
 using Microsoft.Extensions.Options;
 using System.Data.SqlClient;
+using KafkaFlow.Outbox;
 
 namespace KafkaFlow.ProcessManagers.SqlServer;
 
@@ -66,4 +67,7 @@ public sealed class SqlServerProcessStateRepository(IOptions<SqlServerBackendOpt
             version
         }).ConfigureAwait(false);
     }
+
+    public ITransactionScope CreateTransactionScope(TimeSpan timeout) =>
+        SystemTransactionScope.Create(timeout);
 }
