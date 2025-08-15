@@ -57,15 +57,12 @@ if no active scope is detected.
 ### Basic Usage
 
 ```csharp
-public class OrderService
+public class OrderService(IMongoDatabase database, IMessageProducer<IMyProducer> outboxProducer)
 {
-    private readonly IMongoDatabase _database;
-    private readonly IOutboxProducer _outboxProducer;
-
     public async Task CreateOrderAsync(CreateOrderRequest request)
     {
         // Always wrap outbox operations in a transaction scope
-        using var scope = MongoDbTransactionScope.Create(_database.Client);
+        using var scope = MongoDbTransactionScope.Create(database.Client);
 
         // Perform your business operations
         var order = new Order(request.CustomerId, request.Items);
