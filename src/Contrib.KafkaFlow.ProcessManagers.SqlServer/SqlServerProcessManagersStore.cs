@@ -1,15 +1,11 @@
 ﻿using Dapper;
-using KafkaFlow.SqlServer;
-using Microsoft.Extensions.Options;
 using System.Data.SqlClient;
 using KafkaFlow.Outbox;
 
 namespace KafkaFlow.ProcessManagers.SqlServer;
 
-public sealed class SqlServerProcessStateRepository(IOptions<SqlServerBackendOptions> options) : IProcessStateRepository
+public sealed class SqlServerProcessStateRepository(string connectionString) : IProcessStateRepository
 {
-    private readonly SqlServerBackendOptions _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-
     public async ValueTask<int> Persist(Type processType, string processState, Guid processId, VersionedState state)
     {
         var sql = """
@@ -26,7 +22,7 @@ public sealed class SqlServerProcessStateRepository(IOptions<SqlServerBackendOpt
              VALUES (@process_type, @process_id,@process_state);
             """;
 
-        using var conn = new SqlConnection(_options.ConnectionString);
+        using var conn = new SqlConnection(connectionString);
         return await conn.ExecuteAsync(sql, new
         {
             process_type = processType.FullName,
@@ -44,7 +40,7 @@ public sealed class SqlServerProcessStateRepository(IOptions<SqlServerBackendOpt
             WHERE [process_type] = @process_type AND [process_id] = @process_id;
             """;
 
-        await using var conn = new SqlConnection(_options.ConnectionString);
+        await using var conn = new SqlConnection(connectionString);
         return await conn.QueryAsync<ProcessStateTableRow>(sql, new
         {
             process_type = processType.FullName,
@@ -59,7 +55,7 @@ public sealed class SqlServerProcessStateRepository(IOptions<SqlServerBackendOpt
             WHERE [process_type] = @process_type AND [process_id] = @process_id and [rowversion] = @version;
             """;
 
-        using var conn = new SqlConnection(_options.ConnectionString);
+        using var conn = new SqlConnection(connectionString);
         return await conn.ExecuteAsync(sql, new
         {
             process_type = processType.FullName,
