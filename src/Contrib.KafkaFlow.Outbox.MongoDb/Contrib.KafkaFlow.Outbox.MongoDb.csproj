@@ -1,17 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net9.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+  </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="3.2.0" />
+    <PackageReference Include="MongoDB.Driver" Version="3.2.0"/>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Contrib.KafkaFlow.Outbox\Contrib.KafkaFlow.Outbox.csproj" />
+    <None Include="Readme.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Contrib.KafkaFlow.Outbox\Contrib.KafkaFlow.Outbox.csproj"/>
   </ItemGroup>
 
 </Project>
