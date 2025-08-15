@@ -1,4 +1,6 @@
-﻿using KafkaFlow.ProcessManagers;
+﻿using Contrib.KafkaFlow.Outbox.MongoDb;
+using KafkaFlow.Outbox;
+using KafkaFlow.ProcessManagers;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -7,9 +9,11 @@ namespace Contrib.KafkaFlow.ProcessManagers.MongoDb;
 public sealed class MongoDbProcessStateRepository : IProcessStateRepository
 {
     private readonly IMongoCollection<ProcessStateDocument> _collection;
+    private readonly IMongoDatabase _database;
 
     public MongoDbProcessStateRepository(IMongoDatabase database, string collectionName = "process_states")
     {
+        _database = database ?? throw new ArgumentNullException(nameof(database));
         _collection = database.GetCollection<ProcessStateDocument>(collectionName);
 
         var indexKeysDefinition = Builders<ProcessStateDocument>.IndexKeys
@@ -24,6 +28,9 @@ public sealed class MongoDbProcessStateRepository : IProcessStateRepository
 
     public async ValueTask<int> Persist(Type processType, string processState, Guid processId, VersionedState state)
     {
+        if (!MongoDbTransactionScope.TryGetSession(out var session))
+            throw MongoDbTransactionScopeRequiredException.ForMissingScope();
+
         var processObjectId = ObjectId.Parse(processId.ToString("N")[..24]); // Convert Guid to ObjectId
 
         var filter = Builders<ProcessStateDocument>.Filter.And(
@@ -46,7 +53,7 @@ public sealed class MongoDbProcessStateRepository : IProcessStateRepository
         {
             try
             {
-                await _collection.InsertOneAsync(document).ConfigureAwait(false);
+                await _collection.InsertOneAsync(session, document).ConfigureAwait(false);
                 return 1;
             }
             catch (MongoWriteException ex) when (ex.WriteError.Category == ServerErrorCategory.DuplicateKey)
@@ -64,7 +71,7 @@ public sealed class MongoDbProcessStateRepository : IProcessStateRepository
             .Set(x => x.Version, state.Version + 1)
             .Set(x => x.DateUpdatedUtc, DateTime.UtcNow);
 
-        var result = await _collection.UpdateOneAsync(updateFilter, update).ConfigureAwait(false);
+        var result = await _collection.UpdateOneAsync(session, updateFilter, update).ConfigureAwait(false);
 
         return (int)result.ModifiedCount;
     }
@@ -84,6 +91,9 @@ public sealed class MongoDbProcessStateRepository : IProcessStateRepository
 
     public async ValueTask<int> Delete(Type processType, Guid processId, int version)
     {
+        if (!MongoDbTransactionScope.TryGetSession(out var session))
+            throw MongoDbTransactionScopeRequiredException.ForMissingScope();
+
         var processObjectId = ObjectId.Parse(processId.ToString("N")[..24]); // Convert Guid to ObjectId
 
         var filter = Builders<ProcessStateDocument>.Filter.And(
@@ -91,8 +101,11 @@ public sealed class MongoDbProcessStateRepository : IProcessStateRepository
             Builders<ProcessStateDocument>.Filter.Eq(x => x.ProcessId, processObjectId),
             Builders<ProcessStateDocument>.Filter.Eq(x => x.Version, version));
 
-        var result = await _collection.DeleteOneAsync(filter).ConfigureAwait(false);
+        var result = await _collection.DeleteOneAsync(session, filter).ConfigureAwait(false);
 
         return (int)result.DeletedCount;
     }
+
+    public ITransactionScope CreateTransactionScope(TimeSpan timeout) =>
+        MongoDbTransactionScope.Create(_database.Client, timeout);
 }

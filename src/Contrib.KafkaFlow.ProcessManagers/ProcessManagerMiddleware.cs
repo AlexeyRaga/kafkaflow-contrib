@@ -1,4 +1,5 @@
 using System.Transactions;
+using KafkaFlow.Outbox;
 
 namespace KafkaFlow.ProcessManagers;
 
@@ -27,8 +28,8 @@ internal sealed class ProcessManagerMiddleware(
         await next(context).ConfigureAwait(false);
     }
 
-    private TransactionScope? StartTransactionScopeFor(TransactionMode mode) =>
-        mode == _configuration.TransactionMode ? _configuration.BeginTransaction() : null;
+    private ITransactionScope? StartTransactionScopeFor(TransactionMode mode) =>
+        mode == _configuration.TransactionMode ? _stateStore.CreateTransactionScope(_configuration.TransactionTimeout) : null;
 
 
     private async Task RunHandler(Type handlerType, IMessageContext context)

@@ -137,6 +137,7 @@ public sealed class MongoDbTransactionScope : ITransactionScope
     /// Creates a new MongoDB transaction scope using the "Required" transaction pattern.
     /// </summary>
     /// <param name="client">The MongoDB client to use for creating a new session if needed.</param>
+    /// <param name="timeout"> Optional timeout for the transaction commit operation. If not specified, defaults to 30 seconds.</param>
     /// <returns>
     /// A new <see cref="MongoDbTransactionScope"/> that either owns a new session or
     /// reuses an existing session without ownership.
@@ -153,7 +154,7 @@ public sealed class MongoDbTransactionScope : ITransactionScope
     /// Only scopes that own their session will manage transaction commit/abort operations.
     /// </para>
     /// </remarks>
-    public static MongoDbTransactionScope Create(IMongoClient client)
+    public static MongoDbTransactionScope Create(IMongoClient client, TimeSpan? timeout = null)
     {
         // Check if there's already an active session we can reuse
         if (CurrentSessionRef.Value != null)
@@ -173,7 +174,7 @@ public sealed class MongoDbTransactionScope : ITransactionScope
 
             try
             {
-                session.StartTransaction();
+                session.StartTransaction(new TransactionOptions().With(maxCommitTime: timeout ?? TimeSpan.FromSeconds(30)));
             }
             catch (NotSupportedException)
             {

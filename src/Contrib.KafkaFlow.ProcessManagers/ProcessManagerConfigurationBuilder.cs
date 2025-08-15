@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Reflection;
-using System.Transactions;
 
 namespace KafkaFlow.ProcessManagers;
 
@@ -10,13 +9,7 @@ public sealed class ProcessManagerConfigurationBuilder(IDependencyConfigurator d
     private InstanceLifetime _serviceLifetime = InstanceLifetime.Transient;
     private readonly List<Type> _processManagers = [];
     private TransactionMode _transactionMode = TransactionMode.ForEachHandler;
-
-    private Func<TransactionScope> _beginTransaction =
-        () => new TransactionScope(
-            scopeOption: TransactionScopeOption.Required,
-            transactionOptions: new TransactionOptions
-            { IsolationLevel = IsolationLevel.ReadCommitted, Timeout = TimeSpan.FromSeconds(30) },
-            asyncFlowOption: TransactionScopeAsyncFlowOption.Enabled);
+    private TimeSpan _transactionTimeout = TimeSpan.FromSeconds(30);
 
     /// <summary>
     /// Specify how transactions should behave for process managers
@@ -33,12 +26,12 @@ public sealed class ProcessManagerConfigurationBuilder(IDependencyConfigurator d
         return this;
     }
 
-    /// <summary>
-    /// A custom function to create transaction scopes
-    /// </summary>
-    public ProcessManagerConfigurationBuilder WithBeginTransaction(Func<TransactionScope> beginTransaction)
+    public ProcessManagerConfigurationBuilder WithTransactionTimeout(TimeSpan transactionTimeout)
     {
-        _beginTransaction = beginTransaction ?? throw new ArgumentNullException(nameof(beginTransaction));
+        if (transactionTimeout <= TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(transactionTimeout), "Transaction timeout must be greater than zero.");
+
+        _transactionTimeout = transactionTimeout;
         return this;
     }
 
@@ -116,7 +109,7 @@ public sealed class ProcessManagerConfigurationBuilder(IDependencyConfigurator d
             _dependencyConfigurator.Add(processType, processType, _serviceLifetime);
         }
 
-        return new ProcessManagerConfiguration(_transactionMode, mapping, _beginTransaction);
+        return new ProcessManagerConfiguration(_transactionMode, mapping, _transactionTimeout);
     }
 
     private static List<Type> GetMessageTypes(Type processType) =>

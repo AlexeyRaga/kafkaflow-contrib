@@ -1,12 +1,11 @@
 ﻿using Dapper;
+using KafkaFlow.Outbox;
 using Npgsql;
 
 namespace KafkaFlow.ProcessManagers.Postgres;
 
 public sealed class PostgresProcessStateRepository(NpgsqlDataSource connectionPool) : IProcessStateRepository
 {
-    private readonly NpgsqlDataSource _connectionPool = connectionPool;
-
     public async ValueTask<int> Persist(Type processType, string processState, Guid processId, VersionedState state)
     {
         var sql = """
@@ -19,7 +18,7 @@ public sealed class PostgresProcessStateRepository(NpgsqlDataSource connectionPo
                 date_updated_utc = (now() AT TIME ZONE 'utc')
             WHERE xmin = @version
             """;
-        await using var conn = _connectionPool.CreateConnection();
+        await using var conn = connectionPool.CreateConnection();
         return await conn.ExecuteAsync(sql, new
         {
             process_type = processType.FullName,
@@ -37,7 +36,7 @@ public sealed class PostgresProcessStateRepository(NpgsqlDataSource connectionPo
             WHERE process_type = @process_type AND process_id = @process_id
             """;
 
-        await using var conn = _connectionPool.CreateConnection();
+        await using var conn = connectionPool.CreateConnection();
         return (await conn.QueryAsync<(string ProcessState, uint Version)>(sql, new
         {
             process_type = processType.FullName,
@@ -52,7 +51,7 @@ public sealed class PostgresProcessStateRepository(NpgsqlDataSource connectionPo
             WHERE process_type = @process_type AND process_id = @process_id and xmin = @version
             """;
 
-        await using var conn = _connectionPool.CreateConnection();
+        await using var conn = connectionPool.CreateConnection();
         return await conn.ExecuteAsync(sql, new
         {
             process_type = processType.FullName,
@@ -60,4 +59,7 @@ public sealed class PostgresProcessStateRepository(NpgsqlDataSource connectionPo
             version
         }).ConfigureAwait(false);
     }
+
+    public ITransactionScope CreateTransactionScope(TimeSpan timeout) =>
+        SystemTransactionScope.Create(timeout);
 }

@@ -1,14 +1,13 @@
 ﻿using System.Text.Json;
+using KafkaFlow.Outbox;
 
 namespace KafkaFlow.ProcessManagers;
 
-public sealed class ProcessManagersStore(IProcessStateRepository processStateRepository) : IProcessStateStore
+public sealed class ProcessManagersStore(IProcessStateRepository repository) : IProcessStateStore
 {
-    private readonly IProcessStateRepository _processStateRepository = processStateRepository;
-
     public async ValueTask Persist(Type processType, Guid processId, VersionedState state)
     {
-        var persisted = await _processStateRepository.Persist(processType, JsonSerializer.Serialize(state.State), processId, state).ConfigureAwait(false);
+        var persisted = await repository.Persist(processType, JsonSerializer.Serialize(state.State), processId, state).ConfigureAwait(false);
         if (persisted == 0)
         {
             throw new OptimisticConcurrencyException(processType, processId,
@@ -18,7 +17,7 @@ public sealed class ProcessManagersStore(IProcessStateRepository processStateRep
 
     public async ValueTask<VersionedState> Load(Type processType, Guid processId)
     {
-        var result = await _processStateRepository.Load(processType, processId).ConfigureAwait(false);
+        var result = await repository.Load(processType, processId).ConfigureAwait(false);
         var firstResult = result?.FirstOrDefault();
 
         if (firstResult == null)
@@ -32,7 +31,7 @@ public sealed class ProcessManagersStore(IProcessStateRepository processStateRep
 
     public async ValueTask Delete(Type processType, Guid processId, int version)
     {
-        var result = await _processStateRepository.Delete(processType, processId, version).ConfigureAwait(false);
+        var result = await repository.Delete(processType, processId, version).ConfigureAwait(false);
 
         if (result == 0)
         {
@@ -40,4 +39,7 @@ public sealed class ProcessManagersStore(IProcessStateRepository processStateRep
                 $"Concurrency error when persisting state {processType.FullName}");
         }
     }
+
+    public ITransactionScope CreateTransactionScope(TimeSpan timeout) =>
+        repository.CreateTransactionScope(timeout);
 }

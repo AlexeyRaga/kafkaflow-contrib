@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using KafkaFlow.Outbox;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
 
@@ -28,4 +29,7 @@ public sealed class LoggingProcessStateStore(IProcessStateStore innerStore) : IP
         await _innerStore.Delete(processType, processId, version);
         _log.Enqueue((ActionType.Deleted, processType, processId, null));
     }
+
+    public ITransactionScope CreateTransactionScope(TimeSpan timeout) =>
+        _innerStore.CreateTransactionScope(timeout);
 }
