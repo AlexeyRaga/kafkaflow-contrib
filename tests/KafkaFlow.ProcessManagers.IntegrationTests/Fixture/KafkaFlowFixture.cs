@@ -67,12 +67,11 @@ public abstract class KafkaFlowFixture<T, TSerializer, TDeserializer> : IDisposa
                             .WithBrokers(brokers)
                             .CreateTopicIfNotExists(TopicName, numberOfPartitions, replicationFactor)
                             .AddOutboxDispatcher(x => x.WithPartitioner(partitioner))
-                            .AddProducer<T>(producer =>
+                            .AddProducer<IUnOutboxedMessageProducer>(producer =>
                                 producer
-                                    .WithOutbox()
                                     .DefaultTopic(TopicName)
                                     .AddMiddlewares(m => m.AddSerializer<TSerializer>()))
-                            .AddProducer<ITestMessageProducer>(producer =>
+                            .AddProducer<IOutboxedMessageProducer>(producer =>
                                 producer
                                     .WithOutbox()
                                     .DefaultTopic(TopicName)
@@ -96,7 +95,7 @@ public abstract class KafkaFlowFixture<T, TSerializer, TDeserializer> : IDisposa
 
         ServiceProvider = services.BuildServiceProvider();
         ProcessStateStore = (LoggingProcessStateStore)ServiceProvider.GetRequiredService<IProcessStateStore>();
-        Producer = ServiceProvider.GetRequiredService<IMessageProducer<T>>();
+        Producer = ServiceProvider.GetRequiredService<IMessageProducer<IUnOutboxedMessageProducer>>();
 
         var svc = ServiceProvider.GetServices<IHostedService>();
         foreach (var service in svc)
