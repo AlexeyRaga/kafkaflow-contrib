@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using KafkaFlow.Outbox;
 
 namespace KafkaFlow.ProcessManagers.InMemory;
 
@@ -35,4 +36,7 @@ public sealed class InMemoryProcessStateStore : IProcessStateStore
         Store.TryRemove((processType, processId), out _);
         return default;
     }
+
+    public ITransactionScope CreateTransactionScope(TimeSpan timeout) =>
+        SystemTransactionScope.Create(timeout);
 }

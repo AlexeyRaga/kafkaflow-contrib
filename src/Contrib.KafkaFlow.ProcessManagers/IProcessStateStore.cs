@@ -1,3 +1,5 @@
+using KafkaFlow.Outbox;
+
 namespace KafkaFlow.ProcessManagers;
 
 public interface IProcessStateStore
@@ -14,4 +16,6 @@ public interface IProcessStateStore
     ValueTask<VersionedState> Load(Type processType, Guid processId);
 
     ValueTask Delete(Type processType, Guid processId, int version);
+
+    ITransactionScope CreateTransactionScope(TimeSpan timeout);
 }

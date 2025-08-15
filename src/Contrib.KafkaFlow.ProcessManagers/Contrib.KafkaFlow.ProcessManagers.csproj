@@ -25,4 +25,8 @@
     <None Include="Readme.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Contrib.KafkaFlow.Outbox\Contrib.KafkaFlow.Outbox.csproj" />
+  </ItemGroup>
+
 </Project>

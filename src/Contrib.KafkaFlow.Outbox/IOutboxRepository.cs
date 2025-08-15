@@ -22,7 +22,7 @@ public interface IOutboxRepository
     /// </remarks>
     ITransactionScope BeginTransaction()
     {
-        return new WrappedTransactionScope(new(
+        return new SystemTransactionScope(new(
             scopeOption: TransactionScopeOption.RequiresNew,
             transactionOptions: new TransactionOptions
                 { IsolationLevel = IsolationLevel.ReadCommitted, Timeout = TimeSpan.FromSeconds(30) },
