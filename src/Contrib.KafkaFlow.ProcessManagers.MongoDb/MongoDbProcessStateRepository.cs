@@ -1,7 +1,6 @@
 ﻿using Contrib.KafkaFlow.Outbox.MongoDb;
 using KafkaFlow.Outbox;
 using KafkaFlow.ProcessManagers;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Contrib.KafkaFlow.ProcessManagers.MongoDb;
@@ -26,24 +25,21 @@ public sealed class MongoDbProcessStateRepository : IProcessStateRepository
         _collection.Indexes.CreateOneAsync(indexModel);
     }
 
+    private static Guid GenerateProcessId(Type processType, Guid processId) =>
+        GuidUtils.GenerateV5(processType.FullName!, processId);
+
     public async ValueTask<int> Persist(Type processType, string processState, Guid processId, VersionedState state)
     {
         if (!MongoDbTransactionScope.TryGetSession(out var session))
             throw MongoDbTransactionScopeRequiredException.ForMissingScope();
 
-        var processObjectId = ObjectId.Parse(processId.ToString("N")[..24]); // Convert Guid to ObjectId
-
-        var filter = Builders<ProcessStateDocument>.Filter.And(
-            Builders<ProcessStateDocument>.Filter.Eq(x => x.ProcessType, processType.FullName),
-            Builders<ProcessStateDocument>.Filter.Eq(x => x.ProcessId, processObjectId));
-
-        var id = ObjectId.GenerateNewId();
+        var id = GenerateProcessId(processType, processId);
 
         var document = new ProcessStateDocument
         {
             Id = id,
             ProcessType = processType.FullName!,
-            ProcessId = processObjectId,
+            ProcessId = processId,
             ProcessState = processState,
             Version = state.Version,
             DateUpdatedUtc = DateTime.UtcNow
@@ -63,7 +59,7 @@ public sealed class MongoDbProcessStateRepository : IProcessStateRepository
         }
 
         var updateFilter = Builders<ProcessStateDocument>.Filter.And(
-            filter,
+            Builders<ProcessStateDocument>.Filter.Eq(x => x.Id, id),
             Builders<ProcessStateDocument>.Filter.Eq(x => x.Version, state.Version));
 
         var update = Builders<ProcessStateDocument>.Update
@@ -78,11 +74,8 @@ public sealed class MongoDbProcessStateRepository : IProcessStateRepository
 
     public async ValueTask<IEnumerable<ProcessStateTableRow>> Load(Type processType, Guid processId)
     {
-        var processObjectId = ObjectId.Parse(processId.ToString("N")[..24]); // Convert Guid to ObjectId
-
-        var filter = Builders<ProcessStateDocument>.Filter.And(
-            Builders<ProcessStateDocument>.Filter.Eq(x => x.ProcessType, processType.FullName),
-            Builders<ProcessStateDocument>.Filter.Eq(x => x.ProcessId, processObjectId));
+        var id = GenerateProcessId(processType, processId);
+        var filter = Builders<ProcessStateDocument>.Filter.Eq(x => x.Id, id);
 
         var documents = await _collection.Find(filter).ToListAsync().ConfigureAwait(false);
 
@@ -94,11 +87,9 @@ public sealed class MongoDbProcessStateRepository : IProcessStateRepository
         if (!MongoDbTransactionScope.TryGetSession(out var session))
             throw MongoDbTransactionScopeRequiredException.ForMissingScope();
 
-        var processObjectId = ObjectId.Parse(processId.ToString("N")[..24]); // Convert Guid to ObjectId
-
+        var id = GenerateProcessId(processType, processId);
         var filter = Builders<ProcessStateDocument>.Filter.And(
-            Builders<ProcessStateDocument>.Filter.Eq(x => x.ProcessType, processType.FullName),
-            Builders<ProcessStateDocument>.Filter.Eq(x => x.ProcessId, processObjectId),
+            Builders<ProcessStateDocument>.Filter.Eq(x => x.Id, id),
             Builders<ProcessStateDocument>.Filter.Eq(x => x.Version, version));
 
         var result = await _collection.DeleteOneAsync(session, filter).ConfigureAwait(false);

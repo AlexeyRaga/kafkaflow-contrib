@@ -6,13 +6,15 @@ namespace Contrib.KafkaFlow.ProcessManagers.MongoDb;
 public sealed class ProcessStateDocument
 {
     [BsonId]
-    public ObjectId Id { get; set; }
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+    public Guid Id { get; set; }
 
     [BsonElement("processType")]
     public required string ProcessType { get; set; }
 
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     [BsonElement("processId")]
-    public ObjectId ProcessId { get; set; }
+    public Guid ProcessId { get; set; }
 
     [BsonElement("processState")]
     public required string ProcessState { get; set; }
