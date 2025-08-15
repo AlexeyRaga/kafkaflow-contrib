@@ -41,7 +41,6 @@
     <ProjectReference Include="..\..\src\Contrib.KafkaFlow.ProcessManagers.Postgres\Contrib.KafkaFlow.ProcessManagers.Postgres.csproj" />
     <ProjectReference Include="..\..\src\Contrib.KafkaFlow.ProcessManagers.SqlServer\Contrib.KafkaFlow.ProcessManagers.SqlServer.csproj" />
     <ProjectReference Include="..\..\src\Contrib.KafkaFlow.ProcessManagers\Contrib.KafkaFlow.ProcessManagers.csproj" />
-    <ProjectReference Include="..\..\src\Contrib.KafkaFlow.SqlServer\Contrib.KafkaFlow.SqlServer.csproj" />
   </ItemGroup>
 
   <ItemGroup>

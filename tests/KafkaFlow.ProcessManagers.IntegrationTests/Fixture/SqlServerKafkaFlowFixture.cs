@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
 
-public class SqlServerKafkaFlowFixture : KafkaFlowFixture<SqlServerKafkaFlowFixture>
+public sealed class SqlServerKafkaFlowFixture : KafkaFlowFixture<SqlServerKafkaFlowFixture>
 {
     public SqlServerKafkaFlowFixture()
         : base("mssql", ["localhost:9092"]) { }
@@ -13,5 +13,5 @@ public class SqlServerKafkaFlowFixture : KafkaFlowFixture<SqlServerKafkaFlowFixt
     public override void ConfigureFixture(IConfiguration config, IServiceCollection services)
         => services
             .AddSqlServerProcessManagerState(config.GetConnectionString("SqlServerBackend")!)
-            .AddSqlServerOutboxBackend();
+            .AddSqlServerOutboxBackend(config.GetConnectionString("SqlServerBackend")!);
 }

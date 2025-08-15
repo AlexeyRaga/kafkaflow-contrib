@@ -1,14 +1,10 @@
 ﻿using Dapper;
-using KafkaFlow.SqlServer;
-using Microsoft.Extensions.Options;
 using System.Data.SqlClient;
 
 namespace KafkaFlow.Outbox.SqlServer;
 
-public class SqlServerOutboxRepository(IOptions<SqlServerBackendOptions> options) : IOutboxRepository
+public class SqlServerOutboxRepository(string connectionString) : IOutboxRepository
 {
-    private readonly SqlServerBackendOptions _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
-
     public async ValueTask Store(OutboxTableRow outboxTableRow, CancellationToken token = default)
     {
         var sql = """
@@ -16,7 +12,7 @@ public class SqlServerOutboxRepository(IOptions<SqlServerBackendOptions> options
             VALUES (@topic_name, @partition, @message_key, @message_headers, @message_body);
             """;
 
-        using var conn = new SqlConnection(_options.ConnectionString);
+        await using var conn = new SqlConnection(connectionString);
         await conn.ExecuteAsync(sql, new
         {
             topic_name = outboxTableRow.TopicName,
@@ -44,7 +40,7 @@ public class SqlServerOutboxRepository(IOptions<SqlServerBackendOptions> options
                 );
             """;
 
-        using var conn = new SqlConnection(_options.ConnectionString);
+        await using var conn = new SqlConnection(connectionString);
         return await conn.QueryAsync<OutboxTableRow>(sql, new { batch_size = batchSize }).ConfigureAwait(false);
     }
 }
