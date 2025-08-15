@@ -22,7 +22,7 @@ public sealed class MongoDbProcessStateRepository : IProcessStateRepository
         var indexOptions = new CreateIndexOptions { Unique = true };
         var indexModel = new CreateIndexModel<ProcessStateDocument>(indexKeysDefinition, indexOptions);
 
-        _collection.Indexes.CreateOneAsync(indexModel);
+        _collection.Indexes.CreateOne(indexModel);
     }
 
     private static Guid GenerateProcessId(Type processType, Guid processId) =>
