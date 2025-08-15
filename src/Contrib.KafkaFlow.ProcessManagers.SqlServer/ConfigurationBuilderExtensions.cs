@@ -1,19 +1,11 @@
-using KafkaFlow;
-using KafkaFlow.SqlServer;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KafkaFlow.ProcessManagers.SqlServer;
 
 public static class ConfigurationBuilderExtensions
 {
-    public static IServiceCollection AddSqlServerProcessManagerState(this IServiceCollection services) =>
+    public static IServiceCollection AddSqlServerProcessManagerState(this IServiceCollection services, string connectionString) =>
         services
-            .AddSingleton<IProcessStateRepository, SqlServerProcessStateRepository>()
+            .AddSingleton<IProcessStateRepository, SqlServerProcessStateRepository>(_ => new SqlServerProcessStateRepository(connectionString))
             .AddSingleton<IProcessStateStore, ProcessManagersStore>();
-
-    public static IServiceCollection AddSqlServerProcessManagerState(this IServiceCollection services, string connectionString)
-    {
-        services.ConfigureSqlServerBackend(options => options.ConnectionString = connectionString);
-        return AddSqlServerProcessManagerState(services);
-    }
 }
