@@ -1,0 +1,8 @@
+<Project>
+    <PropertyGroup>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Include="../../LICENSE.txt" Pack="true" PackagePath="" />
+    </ItemGroup>
+</Project>
