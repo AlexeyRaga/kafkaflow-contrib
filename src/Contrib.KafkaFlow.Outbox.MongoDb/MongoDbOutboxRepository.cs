@@ -107,7 +107,7 @@ public class MongoDbOutboxRepository : IOutboxRepository
         var filter = Builders<LockDocument>.Filter.And(
             Builders<LockDocument>.Filter.Eq(x => x.Id, lockName),
             Builders<LockDocument>.Filter.Or(
-                Builders<LockDocument>.Filter.Eq(x => x.LockOwner, null),        // No current lock
+                Builders<LockDocument>.Filter.Eq(x => x.LockOwner, _instanceId),        // Owns the lock
                 Builders<LockDocument>.Filter.Lt(x => x.ExpiresAt, now)          // Expired lock
             )
         );
