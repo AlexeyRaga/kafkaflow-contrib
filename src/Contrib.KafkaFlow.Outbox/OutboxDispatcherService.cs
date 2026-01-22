@@ -45,16 +45,20 @@ internal sealed class OutboxDispatcherService(
             var batch = await _outboxBackend.Read(10, stoppingToken).ConfigureAwait(false);
             if (batch.Length == 0) return new DispatchBatchResult.NoBatchToDispatch();
 
-            var messagesToProduce = batch
-                .Select(x => new BatchProduceItem(
-                    topic: x.TopicPartition.Topic,
-                    messageKey: x.Message.Key,
-                    messageValue: x.Message.Value,
-                    headers: BuildHeaders(x)))
-                .ToList();
-
-
-            await _producer.BatchProduceAsync(messagesToProduce).ConfigureAwait(false);
+            // Due to KafkaFlow design choices, _producer.BatchProduceAsync doesn't guarantee
+            // ordering of messages, so we need to produce messages one by one to preserve order.
+            // Yes, it is slower :( But preserving order is more important.
+            // Reason:
+            //    KafkaFlow middlewares are async, and are executed in parallel when using BatchProduceAsync.
+            //    This means that depending on the concurrency gods, messages can be sent to Kafka out of order.
+            foreach (var record in batch)
+            {
+                await _producer.ProduceAsync(
+                    messageKey: record.Message.Key,
+                    messageValue: record.Message.Value,
+                    headers: BuildHeaders(record),
+                    topic: record.TopicPartition.Topic);
+            }
 
             scope.Complete();
             return new DispatchBatchResult.BatchDispatched(batch.Length);
