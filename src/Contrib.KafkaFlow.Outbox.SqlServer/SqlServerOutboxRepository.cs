@@ -47,7 +47,8 @@ public class SqlServerOutboxRepository(string connectionString) : IOutboxReposit
             INTO @DeletedRows
             WHERE
                 [sequence_id] IN (
-                    SELECT TOP (@batch_size) [sequence_id] FROM [outbox].[outbox]
+                    SELECT TOP (@batch_size) [sequence_id]
+                    FROM [outbox].[outbox] WITH (UPDLOCK, HOLDLOCK, ROWLOCK)
                     ORDER BY [sequence_id]
                 );
 
