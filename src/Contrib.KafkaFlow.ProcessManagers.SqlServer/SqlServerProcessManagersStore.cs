@@ -1,6 +1,6 @@
 ﻿using Dapper;
-using System.Data.SqlClient;
 using KafkaFlow.Outbox;
+using Microsoft.Data.SqlClient;
 
 namespace KafkaFlow.ProcessManagers.SqlServer;
 
