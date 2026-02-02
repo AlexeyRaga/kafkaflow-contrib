@@ -28,21 +28,26 @@ public class PostgresOutboxRepository(NpgsqlDataSource connectionPool) : IOutbox
     public async Task<IEnumerable<OutboxTableRow>> Read(int batchSize, CancellationToken token = default)
     {
         var sql = """
-            DELETE FROM outbox.outbox
-            WHERE
-                sequence_id = ANY(ARRAY(
-                    SELECT sequence_id FROM outbox.outbox
-                    ORDER BY sequence_id
-                    LIMIT @batch_size
-                    FOR UPDATE
-                ))
-            RETURNING
-                sequence_id as "SequenceId",
-                topic_name as "TopicName",
-                partition as "Partition",
-                message_key as "MessageKey",
-                message_headers as "MessageHeaders",
-                message_body as "MessageBody"
+            WITH messages AS (
+                DELETE FROM outbox.outbox
+                WHERE
+                    sequence_id = ANY(ARRAY(
+                        SELECT sequence_id FROM outbox.outbox
+                        ORDER BY sequence_id
+                        LIMIT @batch_size
+                        FOR UPDATE
+                    ))
+                RETURNING
+                    sequence_id as "SequenceId",
+                    topic_name as "TopicName",
+                    partition as "Partition",
+                    message_key as "MessageKey",
+                    message_headers as "MessageHeaders",
+                    message_body as "MessageBody"
+            )
+            SELECT SequenceId, TopicName, Partition, MessageKey, MessageHeaders, MessageBody
+            FROM messages
+            ORDER BY SequenceId
             """;
         await using var conn = _connectionPool.CreateConnection();
         return await conn.QueryAsync<OutboxTableRow>(sql, new { batch_size = batchSize }).ConfigureAwait(false);
