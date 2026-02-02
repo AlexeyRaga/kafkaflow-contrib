@@ -31,23 +31,29 @@ public class PostgresOutboxRepository(NpgsqlDataSource connectionPool) : IOutbox
             WITH messages AS (
                 DELETE FROM outbox.outbox
                 WHERE
-                    sequence_id = ANY(ARRAY(
+                    sequence_id IN (
                         SELECT sequence_id FROM outbox.outbox
                         ORDER BY sequence_id
                         LIMIT @batch_size
                         FOR UPDATE
-                    ))
+                    )
                 RETURNING
-                    sequence_id as "SequenceId",
-                    topic_name as "TopicName",
-                    partition as "Partition",
-                    message_key as "MessageKey",
-                    message_headers as "MessageHeaders",
-                    message_body as "MessageBody"
+                    sequence_id,
+                    topic_name,
+                    partition,
+                    message_key,
+                    message_headers,
+                    message_body
             )
-            SELECT SequenceId, TopicName, Partition, MessageKey, MessageHeaders, MessageBody
+            SELECT
+                sequence_id AS "SequenceId",
+                topic_name AS "TopicName",
+                partition AS "Partition",
+                message_key AS "MessageKey",
+                message_headers AS "MessageHeaders",
+                message_body AS "MessageBody"
             FROM messages
-            ORDER BY SequenceId
+            ORDER BY sequence_id
             """;
         await using var conn = _connectionPool.CreateConnection();
         return await conn.QueryAsync<OutboxTableRow>(sql, new { batch_size = batchSize }).ConfigureAwait(false);
