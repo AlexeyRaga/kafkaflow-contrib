@@ -18,10 +18,10 @@ internal sealed class OutboxProducerDecorator(IProducer<byte[], byte[]> inner, I
         string topic,
         Message<byte[], byte[]> message,
         CancellationToken cancellationToken = default) =>
-        ProduceAsync(new TopicPartition(topic, Partition.Any), message, cancellationToken);
+        ProduceAsync(new Confluent.Kafka.TopicPartition(topic, Partition.Any), message, cancellationToken);
 
     public async Task<DeliveryResult<byte[], byte[]>> ProduceAsync(
-        TopicPartition topicPartition,
+        Confluent.Kafka.TopicPartition topicPartition,
         Message<byte[], byte[]> message,
         CancellationToken cancellationToken = default)
     {
@@ -39,7 +39,7 @@ internal sealed class OutboxProducerDecorator(IProducer<byte[], byte[]> inner, I
     public void Produce(string topic, Message<byte[], byte[]> message,
         Action<DeliveryReport<byte[], byte[]>>? deliveryHandler = null) => ProduceAsync(topic, message).ConfigureAwait(false).GetAwaiter().GetResult();
 
-    public void Produce(TopicPartition topicPartition, Message<byte[], byte[]> message,
+    public void Produce(Confluent.Kafka.TopicPartition topicPartition, Message<byte[], byte[]> message,
         Action<DeliveryReport<byte[], byte[]>>? deliveryHandler = null) => ProduceAsync(topicPartition, message).ConfigureAwait(false).GetAwaiter().GetResult();
 
     public void SetSaslCredentials(string username, string password)

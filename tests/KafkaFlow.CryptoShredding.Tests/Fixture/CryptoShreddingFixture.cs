@@ -1,6 +1,6 @@
 using Avro.Specific;
-using Microsoft.Extensions.DependencyInjection;
 using Contrib.KafkaFlow.CryptoShredding.TestContract;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KafkaFlow.CryptoShredding.Tests.Fixture;
 

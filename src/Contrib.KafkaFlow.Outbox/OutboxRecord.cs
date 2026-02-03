@@ -2,4 +2,4 @@
 
 namespace KafkaFlow.Outbox;
 
-public sealed record OutboxRecord(TopicPartition TopicPartition, Message<byte[], byte[]> Message);
+public sealed record OutboxRecord(Confluent.Kafka.TopicPartition TopicPartition, Message<byte[], byte[]> Message);
