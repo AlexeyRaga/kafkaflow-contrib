@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
+using Avro;
+using Avro.Specific;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests.UserLifeCycle;
 

@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using KafkaFlow.ProcessManagers.IntegrationTests.Fixture;
 
 namespace KafkaFlow.ProcessManagers.IntegrationTests.UserLifeCycle;

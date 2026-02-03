@@ -7,7 +7,7 @@ public class OutboxBackend(IOutboxRepository repository) : IOutboxBackend
 {
     public ITransactionScope BeginTransaction() => repository.BeginTransaction();
 
-    public async ValueTask Store(TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)
+    public async ValueTask Store(Confluent.Kafka.TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)
     {
         var rawHeaders =
             message.Headers == null
@@ -35,7 +35,7 @@ public class OutboxBackend(IOutboxRepository repository) : IOutboxBackend
     private static OutboxRecord ToOutboxRecord(OutboxTableRow row)
     {
         var partition = row.Partition.HasValue ? new Partition(row.Partition.Value) : Partition.Any;
-        var topicPartition = new TopicPartition(row.TopicName, partition);
+        var topicPartition = new Confluent.Kafka.TopicPartition(row.TopicName, partition);
 
         var storedHeaders =
             row.MessageHeaders == null

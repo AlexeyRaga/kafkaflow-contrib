@@ -11,11 +11,11 @@ file sealed class NoOpTransactionScope : ITransactionScope
 
 public sealed class InMemoryOutboxBackend : IOutboxBackend
 {
-    private readonly ConcurrentQueue<(TopicPartition, Message<byte[], byte[]>)> _queue = new();
+    private readonly ConcurrentQueue<(Confluent.Kafka.TopicPartition, Message<byte[], byte[]>)> _queue = new();
 
     public ITransactionScope BeginTransaction() => new NoOpTransactionScope();
 
-    public ValueTask Store(TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)
+    public ValueTask Store(Confluent.Kafka.TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default)
     {
         _queue.Enqueue((topicPartition, message));
         return default;

@@ -1,9 +1,9 @@
 using Avro.Util;
-using Contrib.KafkaFlow.CryptoShredding.TestContract;
-using FluentAssertions;
 using FsCheck.Xunit;
 using KafkaFlow.CryptoShredding.Avro;
 using Avro.LogicalTypes;
+using AwesomeAssertions;
+using Contrib.KafkaFlow.CryptoShredding.TestContract;
 
 namespace KafkaFlow.CryptoShredding.Tests;
 
