@@ -167,9 +167,10 @@ public sealed class MongoDbTransactionScope : ITransactionScope
         }
 
         // No existing session, create a new one
+        IClientSessionHandle? session = null;
         try
         {
-            var session = client.StartSession();
+            session = client.StartSession();
             var supportsTransactions = true;
 
             try
@@ -193,6 +194,7 @@ public sealed class MongoDbTransactionScope : ITransactionScope
         }
         catch (MongoException)
         {
+            session?.Dispose();
             // Other MongoDB exceptions (e.g., can't create session at all)
             CurrentSessionRef.Value = null;
             return new MongoDbTransactionScope(
