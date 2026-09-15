@@ -68,6 +68,7 @@ services:
       - "./local-env/mssql:/docker-entrypoint-initdb.d"
       - "./src/Contrib.KafkaFlow.Outbox.SqlServer/schema:/docker-entrypoint-initdb.d/0001.outbox"
       - "./src/Contrib.KafkaFlow.ProcessManagers.SqlServer/schema:/docker-entrypoint-initdb.d/0002.processes"
+      - "./tests/KafkaFlow.ProcessManagers.IntegrationTests/schema:/docker-entrypoint-initdb.d/0003.test-outbox"
 
   mongodb:
     image: mongo:6.0
