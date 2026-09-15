@@ -32,9 +32,14 @@ public sealed class SqlServerOutboxTableLocationTests
     }
 
     [Fact]
-    public void Should_reject_an_empty_identifier() =>
-        FluentActions.Invoking(() => new SqlServerOutboxOptions { TableName = " " }.QualifiedTableName)
-            .Should().Throw<ArgumentException>();
+    public void Should_reject_an_empty_identifier_on_assignment() =>
+        FluentActions.Invoking(() => new SqlServerOutboxOptions { TableName = " " })
+            .Should().Throw<ArgumentException>().WithParameterName("TableName");
+
+    [Fact]
+    public void Should_print_without_throwing() =>
+        new SqlServerOutboxOptions { SchemaName = "Custom", TableName = "kafka_messages" }
+            .ToString().Should().Contain("kafka_messages");
 
     [Fact]
     public void Should_escape_a_closing_bracket_in_an_identifier() =>
