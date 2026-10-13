@@ -101,6 +101,16 @@ public sealed class MongoDbTransactionScope : ITransactionScope
     public bool SupportsTransactions => _supportsTransactions;
 
     /// <summary>
+    /// Gets a value indicating whether the scope can still commit its work.
+    /// </summary>
+    /// <value>
+    /// <c>false</c> once the scope is completed or disposed, or the session's transaction is no longer in progress
+    /// (e.g. aborted); otherwise, <c>true</c>.
+    /// </value>
+    public bool IsActive =>
+        !_disposed && !_completed && (!_supportsTransactions || _session is not { IsInTransaction: false });
+
+    /// <summary>
     /// Attempts to get the current MongoDB session from the execution context.
     /// </summary>
     /// <param name="session">

@@ -56,6 +56,10 @@ internal sealed class OutboxDispatcherService(
             //    This means that depending on the concurrency gods, messages can be sent to Kafka out of order.
             foreach (var record in batch)
             {
+                // An aborted transaction has released its rows to other dispatchers. Narrows, not closes, the duplicate
+                // window: a produce in flight when it aborts can still be re-sent by another dispatcher.
+                if (!scope.IsActive)
+                    throw new TransactionAbortedException("Outbox batch transaction is no longer active");
                 await _producer.ProduceAsync(
                     messageKey: record.Message.Key,
                     messageValue: record.Message.Value,

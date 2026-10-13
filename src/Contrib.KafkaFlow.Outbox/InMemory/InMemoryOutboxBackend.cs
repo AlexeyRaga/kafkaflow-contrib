@@ -5,6 +5,7 @@ namespace KafkaFlow.Outbox.InMemory;
 
 file sealed class NoOpTransactionScope : ITransactionScope
 {
+    public bool IsActive => true;
     public void Complete() { }
     public void Dispose() { }
 }

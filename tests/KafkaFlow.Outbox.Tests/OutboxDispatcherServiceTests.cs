@@ -33,6 +33,40 @@ public sealed class OutboxDispatcherServiceTests
         await dispatcher.StopAsync(CancellationToken.None);
     }
 
+    [Fact]
+    public async Task Batch_whose_transaction_aborts_stops_producing_its_remaining_messages()
+    {
+        var outbox = new FakeOutbox([Record(), Record()], [Record(), Record()]);
+        OnProduce(FirstProduceAbortsTransaction);
+        using var dispatcher = NewDispatcher(outbox);
+
+        await dispatcher.StartAsync(CancellationToken.None);
+        await WaitUntil(() => outbox.Reads > 2, advanceBy: TimeSpan.FromSeconds(10));
+        await dispatcher.StopAsync(CancellationToken.None);
+
+        _produced.Should().Be(3, "the aborted batch stops after its first message; the retry sends both");
+    }
+
+    [Fact]
+    public async Task Batch_whose_non_system_transaction_aborts_stops_producing_its_remaining_messages()
+    {
+        ManualScope? scope = null;
+        var outbox = new FakeOutbox([Record(), Record()]) { NewScope = () => scope = new ManualScope() };
+        OnProduce(() =>
+        {
+            Interlocked.Increment(ref _produced);
+            scope!.IsActive = false;
+            return Task.CompletedTask;
+        });
+        using var dispatcher = NewDispatcher(outbox);
+
+        await dispatcher.StartAsync(CancellationToken.None);
+        await WaitUntil(() => outbox.Reads > 1, advanceBy: TimeSpan.FromSeconds(10));
+        await dispatcher.StopAsync(CancellationToken.None);
+
+        _produced.Should().Be(1);
+    }
+
     private static OutboxRecord Record(Partition? partition = null) =>
         new(new TopicPartition("topic", partition ?? Partition.Any), new Message<byte[], byte[]>());
 
@@ -76,9 +110,11 @@ public sealed class OutboxDispatcherServiceTests
 
         public int AbortedTransactions => Volatile.Read(ref _abortedTransactions);
 
+        public Func<ITransactionScope> NewScope { get; init; } = () => SystemTransactionScope.Create();
+
         public ITransactionScope BeginTransaction() =>
             new ObservedScope(
-                SystemTransactionScope.Create(),
+                NewScope(),
                 () => Interlocked.Increment(ref _abortedTransactions));
 
         public ValueTask Store(TopicPartition topicPartition, Message<byte[], byte[]> message, CancellationToken token = default) =>
@@ -92,6 +128,8 @@ public sealed class OutboxDispatcherServiceTests
 
         private sealed class ObservedScope(ITransactionScope scope, Action onAborted) : ITransactionScope
         {
+            public bool IsActive => scope.IsActive;
+
             public void Complete() => scope.Complete();
 
             public void Dispose()
@@ -107,5 +145,14 @@ public sealed class OutboxDispatcherServiceTests
                 }
             }
         }
+    }
+
+    private sealed class ManualScope : ITransactionScope
+    {
+        public bool IsActive { get; set; } = true;
+
+        public void Complete() { }
+
+        public void Dispose() { }
     }
 }
