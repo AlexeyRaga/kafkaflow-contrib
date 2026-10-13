@@ -6,6 +6,8 @@ namespace KafkaFlow.Outbox;
 
 public static class ConfigurationExtensions
 {
+    private static readonly TimeSpan DispatcherStopTimeout = TimeSpan.FromSeconds(10);
+
     public static IServiceCollection AddOutboxBackend(this IServiceCollection services, Func<IServiceProvider, IOutboxBackend> factory) =>
         services.AddSingleton(factory);
 
@@ -47,7 +49,8 @@ public static class ConfigurationExtensions
         builder.OnStopping(r =>
         {
             var srv = r.Resolve<OutboxDispatcherService>();
-            srv.StopAsync(default).GetAwaiter().GetResult();
+            using var timeout = new CancellationTokenSource(DispatcherStopTimeout);
+            srv.StopAsync(timeout.Token).GetAwaiter().GetResult();
         });
         return builder;
     }

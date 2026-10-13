@@ -67,8 +67,48 @@ public sealed class OutboxDispatcherServiceTests
         _produced.Should().Be(1);
     }
 
-    private static OutboxRecord Record(Partition? partition = null) =>
-        new(new TopicPartition("topic", partition ?? Partition.Any), new Message<byte[], byte[]>());
+    [Fact]
+    public async Task Stop_does_not_wait_for_a_stuck_produce()
+    {
+        var stuck = new TaskCompletionSource();
+        OnProduce(() =>
+        {
+            Interlocked.Increment(ref _produced);
+            return stuck.Task;
+        });
+        using var dispatcher = NewDispatcher(new FakeOutbox([Record()]));
+
+        await dispatcher.StartAsync(CancellationToken.None);
+        await WaitUntil(() => Volatile.Read(ref _produced) == 1);
+
+        await dispatcher.StopAsync(CancellationToken.None).WaitAsync(Timeout);
+    }
+
+    [Fact]
+    public async Task Stop_does_not_wait_for_a_blocked_read_and_ignores_rollback_errors()
+    {
+        var outbox = new Mock<IOutboxBackend>();
+        var reading = new TaskCompletionSource();
+        var scope = new Mock<ITransactionScope>();
+        scope.Setup(t => t.Dispose()).Throws(new InvalidOperationException("rollback during a pending read"));
+        outbox.Setup(o => o.BeginTransaction()).Returns(scope.Object);
+        outbox.Setup(o => o.Read(It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .Returns(() =>
+            {
+                reading.TrySetResult();
+                return new ValueTask<OutboxRecord[]>(new TaskCompletionSource<OutboxRecord[]>().Task);
+            });
+        using var dispatcher = NewDispatcher(outbox.Object);
+
+        await dispatcher.StartAsync(CancellationToken.None);
+        await reading.Task.WaitAsync(Timeout);
+
+        await dispatcher.StopAsync(CancellationToken.None).WaitAsync(Timeout);
+        dispatcher.ExecuteTask!.IsFaulted.Should().BeFalse();
+    }
+
+    private static OutboxRecord Record() =>
+        new(new TopicPartition("topic", Partition.Any), new Message<byte[], byte[]>());
 
     // Same state as the transaction timeout firing mid-produce, without waiting for it.
     private Task FirstProduceAbortsTransaction()

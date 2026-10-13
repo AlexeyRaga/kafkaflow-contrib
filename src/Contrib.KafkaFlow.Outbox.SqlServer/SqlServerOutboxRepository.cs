@@ -76,6 +76,7 @@ public class SqlServerOutboxRepository : IOutboxRepository
     public async Task<IEnumerable<OutboxTableRow>> Read(int batchSize, CancellationToken token = default)
     {
         await using var conn = new SqlConnection(_connectionString);
-        return await conn.QueryAsync<OutboxTableRow>(_readSql, new { batch_size = batchSize }).ConfigureAwait(false);
+        return await conn.QueryAsync<OutboxTableRow>(
+            new CommandDefinition(_readSql, new { batch_size = batchSize }, cancellationToken: token)).ConfigureAwait(false);
     }
 }

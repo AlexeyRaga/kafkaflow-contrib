@@ -21,19 +21,28 @@ internal sealed class OutboxDispatcherService(
         _logger.LogInformation("Outbox dispatcher service has started");
         while (!stoppingToken.IsCancellationRequested)
         {
-            var dispatchResult = await DispatchNextBatchAsync(stoppingToken).ConfigureAwait(false);
-            switch (dispatchResult)
+            try
             {
-                case DispatchBatchResult.BatchDispatched:
-                    break;
-                case DispatchBatchResult.NoBatchToDispatch _:
-                    _logger.LogDebug("The dispatcher queue is empty, will sleep before the next poll");
-                    await Task.Delay(TimeSpan.FromSeconds(1), _timeProvider, stoppingToken);
-                    break;
-                case DispatchBatchResult.DispatchError(var error):
-                    _logger.LogError(error, "Error while dispatching messages");
-                    await Task.Delay(TimeSpan.FromSeconds(10), _timeProvider, stoppingToken);
-                    break;
+                var dispatchResult = await DispatchNextBatchAsync(stoppingToken).ConfigureAwait(false);
+                switch (dispatchResult)
+                {
+                    case DispatchBatchResult.BatchDispatched:
+                        break;
+                    case DispatchBatchResult.NoBatchToDispatch _:
+                        _logger.LogDebug("The dispatcher queue is empty, will sleep before the next poll");
+                        await Task.Delay(TimeSpan.FromSeconds(1), _timeProvider, stoppingToken);
+                        break;
+                    case DispatchBatchResult.DispatchError(var error):
+                        _logger.LogError(error, "Error while dispatching messages");
+                        await Task.Delay(TimeSpan.FromSeconds(10), _timeProvider, stoppingToken);
+                        break;
+                }
+            }
+            // Any exception, not only OperationCanceledException: SqlClient reports cancellation as SqlException, and
+            // rolling back during a pending query can throw. The host logs anything but cancellation as a failure.
+            catch (Exception) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
             }
         }
         _logger.LogInformation("Outbox dispatcher service has stopped");
@@ -45,7 +54,8 @@ internal sealed class OutboxDispatcherService(
         {
             // Inside try: Dispose throws TransactionAbortedException when the batch outlives the scope timeout.
             using var scope = _outboxBackend.BeginTransaction();
-            var batch = await _outboxBackend.Read(10, stoppingToken).ConfigureAwait(false);
+            // WaitAsync: a backend may ignore the token, which would block shutdown.
+            var batch = await _outboxBackend.Read(10, stoppingToken).AsTask().WaitAsync(stoppingToken).ConfigureAwait(false);
             if (batch.Length == 0) return new DispatchBatchResult.NoBatchToDispatch();
 
             // Due to KafkaFlow design choices, _producer.BatchProduceAsync doesn't guarantee
@@ -64,13 +74,15 @@ internal sealed class OutboxDispatcherService(
                     messageKey: record.Message.Key,
                     messageValue: record.Message.Value,
                     headers: BuildHeaders(record),
-                    topic: record.TopicPartition.Topic);
+                    topic: record.TopicPartition.Topic)
+                    // KafkaFlow's ProduceAsync takes no token; librdkafka keeps retrying until message.timeout.ms.
+                    .WaitAsync(stoppingToken).ConfigureAwait(false);
             }
 
             scope.Complete();
             return new DispatchBatchResult.BatchDispatched(batch.Length);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
         {
             return new DispatchBatchResult.DispatchError(ex);
         }

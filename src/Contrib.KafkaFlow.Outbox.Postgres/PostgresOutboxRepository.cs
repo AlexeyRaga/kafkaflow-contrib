@@ -56,6 +56,7 @@ public class PostgresOutboxRepository(NpgsqlDataSource connectionPool) : IOutbox
             ORDER BY sequence_id
             """;
         await using var conn = _connectionPool.CreateConnection();
-        return await conn.QueryAsync<OutboxTableRow>(sql, new { batch_size = batchSize }).ConfigureAwait(false);
+        return await conn.QueryAsync<OutboxTableRow>(
+            new CommandDefinition(sql, new { batch_size = batchSize }, cancellationToken: token)).ConfigureAwait(false);
     }
 }
