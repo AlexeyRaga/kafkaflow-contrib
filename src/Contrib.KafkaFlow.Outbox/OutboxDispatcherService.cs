@@ -8,11 +8,13 @@ namespace KafkaFlow.Outbox;
 internal sealed class OutboxDispatcherService(
     ILogger<OutboxDispatcherService> logger,
     IMessageProducer<IOutboxDispatcher> producer,
-    IOutboxBackend outboxBackend) : BackgroundService
+    IOutboxBackend outboxBackend,
+    TimeProvider timeProvider) : BackgroundService
 {
     private readonly ILogger _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IMessageProducer<IOutboxDispatcher> _producer = producer ?? throw new ArgumentNullException(nameof(producer));
     private readonly IOutboxBackend _outboxBackend = outboxBackend ?? throw new ArgumentNullException(nameof(outboxBackend));
+    private readonly TimeProvider _timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -26,11 +28,11 @@ internal sealed class OutboxDispatcherService(
                     break;
                 case DispatchBatchResult.NoBatchToDispatch _:
                     _logger.LogDebug("The dispatcher queue is empty, will sleep before the next poll");
-                    await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+                    await Task.Delay(TimeSpan.FromSeconds(1), _timeProvider, stoppingToken);
                     break;
                 case DispatchBatchResult.DispatchError(var error):
                     _logger.LogError(error, "Error while dispatching messages");
-                    await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
+                    await Task.Delay(TimeSpan.FromSeconds(10), _timeProvider, stoppingToken);
                     break;
             }
         }
@@ -39,9 +41,10 @@ internal sealed class OutboxDispatcherService(
 
     private async Task<DispatchBatchResult> DispatchNextBatchAsync(CancellationToken stoppingToken)
     {
-        using var scope = _outboxBackend.BeginTransaction();
         try
         {
+            // Inside try: Dispose throws TransactionAbortedException when the batch outlives the scope timeout.
+            using var scope = _outboxBackend.BeginTransaction();
             var batch = await _outboxBackend.Read(10, stoppingToken).ConfigureAwait(false);
             if (batch.Length == 0) return new DispatchBatchResult.NoBatchToDispatch();
 

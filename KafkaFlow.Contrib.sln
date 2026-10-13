@@ -53,6 +53,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "mongodb", "mongodb", "{31CC
 		local-env\mongodb\init-mongo.js = local-env\mongodb\init-mongo.js
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaFlow.Outbox.Tests", "tests\KafkaFlow.Outbox.Tests\KafkaFlow.Outbox.Tests.csproj", "{626DA21B-3072-4303-9792-9442DE02E00D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -207,6 +209,18 @@ Global
 		{56811A04-65DF-435F-9D34-955623ECF94B}.Release|x64.Build.0 = Release|Any CPU
 		{56811A04-65DF-435F-9D34-955623ECF94B}.Release|x86.ActiveCfg = Release|Any CPU
 		{56811A04-65DF-435F-9D34-955623ECF94B}.Release|x86.Build.0 = Release|Any CPU
+		{626DA21B-3072-4303-9792-9442DE02E00D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{626DA21B-3072-4303-9792-9442DE02E00D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{626DA21B-3072-4303-9792-9442DE02E00D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{626DA21B-3072-4303-9792-9442DE02E00D}.Debug|x64.Build.0 = Debug|Any CPU
+		{626DA21B-3072-4303-9792-9442DE02E00D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{626DA21B-3072-4303-9792-9442DE02E00D}.Debug|x86.Build.0 = Debug|Any CPU
+		{626DA21B-3072-4303-9792-9442DE02E00D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{626DA21B-3072-4303-9792-9442DE02E00D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{626DA21B-3072-4303-9792-9442DE02E00D}.Release|x64.ActiveCfg = Release|Any CPU
+		{626DA21B-3072-4303-9792-9442DE02E00D}.Release|x64.Build.0 = Release|Any CPU
+		{626DA21B-3072-4303-9792-9442DE02E00D}.Release|x86.ActiveCfg = Release|Any CPU
+		{626DA21B-3072-4303-9792-9442DE02E00D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -228,6 +242,7 @@ Global
 		{BA3CCCF1-E413-48F3-A74B-0C0E5839DEBD} = {1C394058-3704-40CC-A4AB-4A2C67CE916E}
 		{8A13D2C5-1487-44E4-8E1C-F4BDC8E14396} = {1C394058-3704-40CC-A4AB-4A2C67CE916E}
 		{31CC6FFF-C049-4E49-BBA9-F91A32D0B57A} = {1C394058-3704-40CC-A4AB-4A2C67CE916E}
+		{626DA21B-3072-4303-9792-9442DE02E00D} = {A5E2EC13-2E8B-4EB3-8C0F-D252A04B42F4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {66EE15D8-69C4-4AFB-9EB8-6020B2D8C01A}

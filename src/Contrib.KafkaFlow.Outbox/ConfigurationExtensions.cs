@@ -1,5 +1,6 @@
 using KafkaFlow.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace KafkaFlow.Outbox;
 
@@ -32,7 +33,11 @@ public static class ConfigurationExtensions
             configure?.Invoke(producerBuilder);
             producerBuilder.Build();
         });
-        builder.DependencyConfigurator.AddSingleton<OutboxDispatcherService>();
+        builder.DependencyConfigurator.AddSingleton(r => new OutboxDispatcherService(
+            r.Resolve<ILogger<OutboxDispatcherService>>(),
+            r.Resolve<IMessageProducer<IOutboxDispatcher>>(),
+            r.Resolve<IOutboxBackend>(),
+            TimeProvider.System));
         builder.OnStarted(r =>
         {
             var srv = r.Resolve<OutboxDispatcherService>();

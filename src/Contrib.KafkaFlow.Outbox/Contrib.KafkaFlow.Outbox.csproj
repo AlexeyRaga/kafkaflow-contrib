@@ -22,6 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="KafkaFlow.Outbox.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="Readme.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
