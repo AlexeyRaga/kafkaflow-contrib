@@ -45,6 +45,16 @@ public interface IOutboxProducerConfigurationBuilder
     IOutboxProducerConfigurationBuilder WithPartitioner(Partitioner partitioner);
 
     /// <summary>
+    /// Sets how long the producer retries delivering a message before failing it (librdkafka `message.timeout.ms`).
+    /// Keep it below the outbox batch transaction timeout (30s by default) so a Kafka outage fails the batch
+    /// before its transaction aborts.
+    /// default: 300000 (5 minutes)
+    /// </summary>
+    /// <param name="timeout">The delivery timeout</param>
+    /// <returns></returns>
+    IOutboxProducerConfigurationBuilder WithMessageTimeout(TimeSpan timeout);
+
+    /// <summary>
     /// Sets compression configurations in the producer
     /// </summary>
     /// <param name="compressionType">

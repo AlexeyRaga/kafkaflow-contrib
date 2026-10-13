@@ -52,7 +52,10 @@ services
                         // I strongly recommend to use Murmur2Random since it is
                         // the "original" default in Java ecosystem, and is shared by other
                         // ecosystems such as JavaScript or Python.
-                        dispatcher.WithPartitioner(Partitioner.Murmur2Random))
+                        dispatcher
+                            .WithPartitioner(Partitioner.Murmur2Random)
+                            // Fail a produce before the 30s batch transaction times out
+                            .WithMessageTimeout(TimeSpan.FromSeconds(20)))
                     .AddProducer("default", producer =>
                         producer
                             // Make this producer go through the outbox

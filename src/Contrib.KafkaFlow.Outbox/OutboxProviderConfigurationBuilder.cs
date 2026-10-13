@@ -16,6 +16,12 @@ internal sealed class OutboxProducerConfigurationBuilder(IProducerConfigurationB
         return this;
     }
 
+    public IOutboxProducerConfigurationBuilder WithMessageTimeout(TimeSpan timeout)
+    {
+        _producerConfig.MessageTimeoutMs = (int)timeout.TotalMilliseconds;
+        return this;
+    }
+
     public IOutboxProducerConfigurationBuilder WithCompression(CompressionType compressionType, int? compressionLevel)
     {
         _producerConfig.CompressionType = compressionType;
